@@ -222,20 +222,14 @@ local function GetNearChar()
         if v:IsA('Model') and hum and hum.Health > 0 and not v.Name:lower():match('child') and not v.Name:lower():match('trader') then
 
             local dist = (v:GetPivot().Position - rootPos).Magnitude
-
-            -- selalu cek single‐attack
             if not MultipleAttack and dist < minDist then
                 minDist, closest = dist, v
             end
-
-            -- selalu cek multi‐attack
             if MultipleAttack and dist <= AuraRange then
                 table.insert(results, v)
             end
         end
     end
-
-    -- jika single, masukkan hasil closest sekali saja
     if not MultipleAttack and closest then
         table.insert(results, closest)
     end
