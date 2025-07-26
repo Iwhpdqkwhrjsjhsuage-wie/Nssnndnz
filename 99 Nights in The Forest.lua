@@ -176,15 +176,12 @@ local function BringScrap(target, click)
     workspace.StreamingEnabled = false
     pcall(function()
         for i, v in pairs(workspace.Items:GetChildren()) do
-            if v:IsA('Model') and v:GetAttribute('Scrappable') and (click or not SavedScrap[v]) then
+            if v:IsA('Model') and v.Parent == workspace.Items and v:GetAttribute('Scrappable') then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    task.wait()
+                    repeat task.wait() until tostring(v:GetAttribute("Owner")) == tostring(LocalPlayer.UserId)
                     v:PivotTo(CFrame.new(target))
-                    if not click then
-                        SavedScrap[v] = true
-                    end
                     task.wait(0.1)
                 end
             end
