@@ -182,6 +182,7 @@ local function BringScrap(target, click)
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
                     repeat task.wait() until tostring(v:GetAttribute("Owner")) == tostring(LocalPlayer.UserId)
                     v:PivotTo(CFrame.new(target))
+                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     task.wait(0.1)
                 end
             end
