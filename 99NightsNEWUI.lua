@@ -894,7 +894,7 @@ BringTab:AddDropdown("TypeItem", {
 	Multi = true, -- true / false, allows multiple choices to be selected
 	Text = "Type Item",
 	Callback = function(Value)
-        for key, value in next, Options.MyMultiDropdown.Value do
+        for key, value in next, Options.TypeItem.Value do
 			print(key, value) -- should print something like This, true
 		end
 	end,
