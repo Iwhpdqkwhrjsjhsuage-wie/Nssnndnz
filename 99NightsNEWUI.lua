@@ -22,12 +22,17 @@ local MainToggle = {
     Food = false,
     AutoPlant = false,
     ActiveAllCode = false,
-    ActiveEsp = false
+    ActiveEsp = false,
+    AutoEat = false
 }
 
 local EspToggle = {
     Animals = false,
     Items = false
+}
+
+local TeleportToggle = {
+    Campfire = false
 }
 ----\\ Connection //----
 local MainConnection = {
@@ -36,7 +41,8 @@ local MainConnection = {
     InstantInteract = nil,
     WalkSpeed = nil,
     NoFog = nil,
-    NoFogRemoved = nil
+    NoFogRemoved = nil,
+    AutoEat = nil
 }
 
 local EspConnection = {
@@ -44,6 +50,10 @@ local EspConnection = {
     AnimalsRemoved = nil,
     Items = nil,
     ItemsRemoved = nil
+}
+
+local TeleportConnection = {
+    Campfire = nil
 }
 ----\\ Variables //----
 local MainVariable = {
@@ -62,6 +72,19 @@ local EspVariable = {
     Animals = false
 }
 
+local SelectedFood = {}
+local SavedPrompt = {}
+local SavedModel = {}
+local SavedChest = {}
+local SelectedItem = {}
+
+local SavedHitbox = setmetatable({}, { __mode = "kv" })
+local SavedEsp = setmetatable({}, { __mode = "k" })
+local SavedFood = setmetatable({}, { __mode = "k" })
+local SavedScrap = setmetatable({}, { __mode = "k" })
+local SavedItems = setmetatable({}, { __mode = "k" })
+local SavedEspAnimal = setmetatable({}, { __mode = "k" })
+
 local ActiveBringItems = false
 local PositionPlant = 'Random'
 local BringFuelItems = false
@@ -78,21 +101,11 @@ local count = 0
 local countesp = 0
 local Processing = 0
 local HitboxTransparency = 0.8
-local SavedHitbox = setmetatable({}, { __mode = "kv" })
-local SavedPrompt = {}
-local SavedModel = {}
-local SavedEsp = setmetatable({}, { __mode = "k" })
-local SavedFood = setmetatable({}, { __mode = "k" })
-local SavedScrap = setmetatable({}, { __mode = "k" })
-local SavedItems = setmetatable({}, { __mode = "k" })
-local SavedEspAnimal = setmetatable({}, { __mode = "k" })
-local SavedChest = {}
-local SelectedItem = {}
 local ActiveHighlight = false
 local Humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
 local SavedWalkSpeed = Humanoid.WalkSpeed or 20
 local WalkSpeedValue = 30
-
+local persen = 20
 ----\\ FUNCTIONS //----
 local Functions = {}
 local RunFunctions = {}
@@ -104,6 +117,33 @@ Functions.GetAllActiveToggle = function()
         end
     end
     return false
+end
+
+Functions.EatFood = function()
+    for _, v in pairs(workspace.Items:GetChildren()) do
+        local bar = game:GetService("Players").LocalPlayer.PlayerGui.Interface.StatBars.HungerBar.Bar
+        if bar.Size.X.Scale >= 1 then
+            break
+        end
+        for _, isi in pairs(SelectedFood) do
+            if isi == 'Cooked Food' and v.Name:lower():match('cook') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+            if isi == 'Raw Food' and (v.Name == 'Morsel' or v.Name == 'Steak') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+            if isi == 'Vegetable Food' and not v.Name:lower():match('morsel') and not v.Name:lower():match('steak') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+        end
+    end
+end
+
+Functions.TeleportTo = function(target)
+    if not target then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+    char:PivotTo(CFrame.new(target))
 end
 
 Functions.AutoPlant = function()
@@ -801,6 +841,43 @@ RunFunctions.ActiveAura = function(state)
     end
 end
 
+RunFunctions.AutoTeleportToCampfire = function(state)
+    TeleportToggle.Campfire = state
+    if TeleportToggle.Campfire then
+        if game.Lighting.ClockTime <= 0 then
+            Functions.TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
+        end
+        TeleportConnection.Campfire = game.Lighting.Changed:Connect(function(prop)
+            if tostring(prop) == 'ClockTime' and game.Lighting.ClockTime <= 0 then
+                Functions.TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
+            end
+        end)
+    else
+        if TeleportConnection.Campfire then
+            TeleportConnection.Campfire:Disconnect()
+            TeleportConnection.Campfire = nil
+        end
+    end
+end
+
+RunFunctions.AutoEatFood = function(state)
+    MainToggle.AutoEat = state
+    if MainToggle.AutoEat then
+        local bar = game:GetService("Players").LocalPlayer.PlayerGui.Interface.StatBars.HungerBar.Bar
+        MainConnection.AutoEat = bar:GetPropertyChangedSignal("Size"):Connect(function()
+            local getresult = persen / 100 * 1
+            if bar.Size.X.Scale <= getresult then
+                Functions.EatFood()
+            end
+        end)
+    else
+        if MainConnection.AutoEat then
+            MainConnection.AutoEat:Disconnect()
+            MainConnection.AutoEat = nil
+        end
+    end
+end
+
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -835,18 +912,52 @@ local Tabs = {
 
 local AuraTab = Tabs.Main:AddLeftGroupbox("Aura", "sword")
 
+AuraTab:AddInput("TextBoxRangeAura", {
+	Default = 20,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+
+	Text = "Range Aura",
+	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
+
+	Placeholder = "Type here!"
+	-- MaxLength is also an option which is the max length of the text
+
+	Callback = function(Value)
+		Options.RangeAura:SetValue(Value)
+	end,
+})
+
 AuraTab:AddSlider("RangeAura", {
 	Text = "Range Aura",
 	Default = 20,
 	Min = 0,
 	Max = 700,
 	Rounding = 0,
-	Compact = false,
+	Compact = true,
     Callback = function(Value)
         AuraRange = Value
 	end,
 	Disabled = false,
 	Visible = true, 
+})
+
+AuraTab:AddInput("TextBoxSpeed", {
+	Default = 0.2,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+
+	Text = "Speed",
+	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
+
+	Placeholder = "Type here!"
+	-- MaxLength is also an option which is the max length of the text
+
+	Callback = function(Value)
+		Options.Speed:SetValue(Value)
+	end,
 })
 
 AuraTab:AddSlider("Speed", {
@@ -855,7 +966,7 @@ AuraTab:AddSlider("Speed", {
 	Min = 0,
 	Max = 1,
 	Rounding = 1,
-	Compact = false,
+	Compact = true,
     Callback = function(Value)
         Speed = Value
 	end,
@@ -885,6 +996,77 @@ AuraTab:AddToggle("ChopTree", {
 		task.spawn(function()
             MainToggle.TreeAura = true
             RunFunctions.ActiveAura(Value)
+        end)
+	end,
+})
+
+local OtherTab = Tabs.Main:AddLeftGroupbox("Other", "home")
+
+OtherTab:AddDropdown("TypeFood", {
+	Values = { "Cooked Food", "Raw Food", "Vegetable Food" },
+	Default = 1,
+	Multi = true, -- true / false, allows multiple choices to be selected
+	Text = "Type Food",
+	Callback = function(Value)
+        for key, value in next, Options.TypeItem.Value do
+			if value then
+                table.insert(SelectedFood, key)
+            end
+		end
+	end,
+})
+
+OtherTab:AddInput("TextBoxHunger", {
+	Default = 20,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+
+	Text = "Eat if Hunger Reach (%)",
+	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
+
+	Placeholder = "Type here!"
+	-- MaxLength is also an option which is the max length of the text
+
+	Callback = function(Value)
+		Options.PercentageHunger:SetValue(Value)
+	end,
+})
+
+OtherTab:AddSlider("PercentageHunger", {
+	Text = "Eat if Hunger Reach (%)",
+	Default = 20,
+	Min = 1,
+	Max = 99,
+	Rounding = 0,
+	Compact = true,
+    Callback = function(Value)
+        persen = Value
+	end,
+	Disabled = false,
+	Visible = true, 
+})
+
+OtherTab:AddToggle("AutoEatFood", {
+	Text = "Auto Eat Food",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.AutoEatFood(Value)
+        end)
+	end,
+})
+
+OtherTab:AddToggle("AutoEat", {
+	Text = "Eat Food",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            Functions.EatFood()
         end)
 	end,
 })
