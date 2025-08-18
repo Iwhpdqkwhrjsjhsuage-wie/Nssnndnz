@@ -663,7 +663,7 @@ RunFunctions.ActiveAllCode = function(state)
                 end
                 if MainToggle.Scrapper then
                     if not BringFuelItems and not BringScrapItems then
-                        ScrapperToggle:SetValue(false)
+                        Toggles.AutoBringtoScrapper:SetValue(false)
                     end
                     if BringFuelItems and not MainVariable.BringFuel1 then
                         MainVariable.BringFuel1 = true
@@ -869,7 +869,7 @@ AuraTab:AddToggle("Enemy", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            ActiveAura(Value)
+            RunFunctions.ActiveAura(Value)
         end)
 	end,
 })
@@ -881,7 +881,7 @@ AuraTab:AddToggle("ChopTree", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            ActiveAura(Value)
+            RunFunctions.ActiveAura(Value)
         end)
 	end,
 })
@@ -889,13 +889,95 @@ AuraTab:AddToggle("ChopTree", {
 local BringTab = Tabs.Main:AddRightGroupbox("Bring Items", "box")
 
 BringTab:AddDropdown("TypeItem", {
-	Values = { "Food", "Fuel", "Food", "Scrap" },
+	Values = { "Food", "Fuel", "Scrap" },
 	Default = 1,
 	Multi = true, -- true / false, allows multiple choices to be selected
 	Text = "Type Item",
 	Callback = function(Value)
         for key, value in next, Options.TypeItem.Value do
-			print(key, value) -- should print something like This, true
+			if tostring(key) == "Food" and not MainToggle.Food then
+                MainToggle.Food = true
+            end
+            if tostring(key) == "Fuel" and not BringFuelItems then
+                BringFuelItems = true
+            end
+            if tostring(key) == "Scrap" and not BringScrapItems then
+                BringScrapItems = true
+            end
 		end
 	end,
 })
+
+BringTab:AddToggle("AutoBringtoScrapper", {
+	Text = "Auto Bring to Scrapper",
+    ToolTip = "Bring Selected Type Item"
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            MainToggle.Scrapper = state
+            RunFunctions.ActiveAllCode(state)
+        end)
+	end,
+})
+
+BringTab:AddToggle("AutoBringtoCampfire", {
+	Text = "Auto Bring to Campfire",
+    ToolTip = "Only Bring Fuel and Food"
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            MainToggle.Campfire = state
+            RunFunctions.ActiveAllCode(state)
+        end)
+	end,
+})
+
+BringTab:AddButton({
+	Text = "Bring to Scrapper",
+	Func = function()
+		Functions.BringScrap(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+BringTab:AddButton({
+	Text = "Bring to Campfire",
+    ToolTip = "Only Bring Fuel",
+	Func = function()
+		Functions.BringFuel(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+BringTab:AddButton({
+	Text = "Bring Foods",
+	Func = function()
+		Functions.BringFood(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+BringTab:AddButton({
+	Text = "Bring Foods to Campfire",
+	Func = function()
+		Functions.BringFood(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0), true)
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
