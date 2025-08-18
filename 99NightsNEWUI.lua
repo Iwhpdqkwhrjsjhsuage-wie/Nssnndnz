@@ -934,6 +934,7 @@ AuraTab:AddSlider("RangeAura", {
 	Compact = true,
     Callback = function(Value)
         AuraRange = Value
+        Options.TextBoxRangeAura:SetValue(Value)
 	end,
 	Disabled = false,
 	Visible = true, 
@@ -961,6 +962,7 @@ AuraTab:AddSlider("Speed", {
 	Compact = true,
     Callback = function(Value)
         Speed = Value
+        Options.TextBoxSpeed:SetValue(Value)
 	end,
 	Disabled = false,
 	Visible = true, 
@@ -1153,3 +1155,72 @@ BringTab:AddButton({
 	Risky = false,
 })
 
+local HitboxTab = Tabs.Main:AddRightGroupbox("Hitbox", "")
+
+HitboxTab:AddInput("TextBoxSizeHitbox", {
+	Default = 20,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+	Text = "Size",
+	Tooltip = "For Mobile",
+	Placeholder = "Type here!",
+	Callback = function(Value)
+		Options.SizeHitbox:SetValue(Value)
+	end,
+})
+
+HitboxTab:AddSlider("SizeHitbox", {
+	Text = "Size",
+	Default = 20,
+	Min = 0,
+	Max = 200,
+	Rounding = 0,
+	Compact = true,
+    Callback = function(Value)
+        HitboxSize = Value
+        Options.TextBoxSizeHitbox:SetValue(Value)
+	end,
+	Disabled = false,
+	Visible = true, 
+})
+
+HitboxTab:AddInput("TextBoxTransparencyHitbox", {
+	Default = 0.5,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+	Text = "Transparancy",
+	Tooltip = "For Mobile",
+	Placeholder = "Type here!",
+	Callback = function(Value)
+		Options.TransparancyHitbox:SetValue(Value)
+	end,
+})
+
+HitboxTab:AddSlider("TransparancyHitbox", {
+	Text = "Transparancy",
+	Default = 0.5,
+	Min = 0,
+	Max = 1,
+	Rounding = 0,
+	Compact = true,
+    Callback = function(Value)
+        HitboxTransparency = Value
+        Options.TextBoxTransparencyHitbox:SetValue(Value)
+	end,
+	Disabled = false,
+	Visible = true, 
+})
+
+HitboxTab:AddToggle("HitboxExpander", {
+	Text = "Expand Hitbox Animals",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.HitboxExpander(state)
+        end)
+	end,
+})
