@@ -917,13 +917,9 @@ AuraTab:AddInput("TextBoxRangeAura", {
 	Numeric = true, -- true / false, only allows numbers
 	Finished = false, -- true / false, only calls callback when you press enter
 	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
-
 	Text = "Range Aura",
 	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
-
-	Placeholder = "Type here!"
-	-- MaxLength is also an option which is the max length of the text
-
+	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.RangeAura:SetValue(Value)
 	end,
@@ -948,13 +944,9 @@ AuraTab:AddInput("TextBoxSpeed", {
 	Numeric = true, -- true / false, only allows numbers
 	Finished = false, -- true / false, only calls callback when you press enter
 	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
-
 	Text = "Speed",
-	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
-
-	Placeholder = "Type here!"
-	-- MaxLength is also an option which is the max length of the text
-
+	Tooltip = "For Mobile",
+	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.Speed:SetValue(Value)
 	end,
@@ -1021,13 +1013,9 @@ OtherTab:AddInput("TextBoxHunger", {
 	Numeric = true, -- true / false, only allows numbers
 	Finished = false, -- true / false, only calls callback when you press enter
 	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
-
 	Text = "Eat if Hunger Reach (%)",
-	Tooltip = "For Mobile", -- Information shown when you hover over the textbox
-
-	Placeholder = "Type here!"
-	-- MaxLength is also an option which is the max length of the text
-
+	Tooltip = "For Mobile",
+	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.PercentageHunger:SetValue(Value)
 	end,
