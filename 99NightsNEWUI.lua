@@ -1000,7 +1000,7 @@ OtherTab:AddDropdown("TypeFood", {
 	Multi = true, -- true / false, allows multiple choices to be selected
 	Text = "Type Food",
 	Callback = function(Value)
-        for key, value in next, Options.TypeItem.Value do
+        for key, value in next, Options.TypeFood.Value do
 			if value then
                 table.insert(SelectedFood, key)
             end
@@ -1030,6 +1030,7 @@ OtherTab:AddSlider("PercentageHunger", {
 	Compact = true,
     Callback = function(Value)
         persen = Value
+        Options.TextBoxHunger:SetValue(Value)
 	end,
 	Disabled = false,
 	Visible = true, 
@@ -1047,16 +1048,15 @@ OtherTab:AddToggle("AutoEatFood", {
 	end,
 })
 
-OtherTab:AddToggle("AutoEat", {
+BringTab:AddButton({
 	Text = "Eat Food",
-	Default = false,
+	Func = function()
+		Functions.EatFood()
+	end,
+	DoubleClick = false,
 	Disabled = false,
 	Visible = true,
-	Callback = function(Value)
-		task.spawn(function()
-            Functions.EatFood()
-        end)
-	end,
+	Risky = false,
 })
 
 local BringTab = Tabs.Main:AddRightGroupbox("Bring Items", "box")
@@ -1110,7 +1110,7 @@ BringTab:AddToggle("AutoBringtoCampfire", {
 })
 
 BringTab:AddButton({
-	Text = "Bring to Scrapper",
+	Text = "Bring Scrap",
 	Func = function()
 		Functions.BringScrap(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
 	end,
@@ -1121,8 +1121,7 @@ BringTab:AddButton({
 })
 
 BringTab:AddButton({
-	Text = "Bring to Campfire",
-    ToolTip = "Only Bring Fuel",
+	Text = "Bring Bring Fuel",
 	Func = function()
 		Functions.BringFuel(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
 	end,
