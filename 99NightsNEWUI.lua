@@ -141,6 +141,7 @@ Functions.BringFood = function(target, click)
                 if distance > 20 and v.PrimaryPart then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
                     v:PivotTo(CFrame.new(target))
+                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     if not click then
                         SavedFood[v] = true
                     end
@@ -159,7 +160,6 @@ Functions.BringScrap = function(target, click)
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    repeat task.wait() until tostring(v:GetAttribute("Owner")) == tostring(LocalPlayer.UserId)
                     v:PivotTo(CFrame.new(target))
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     task.wait(0.1)
@@ -181,6 +181,7 @@ Functions.BringFuel = function(target, blacklist)
                     if distance > 7 and v.PrimaryPart then
                         game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         v:PivotTo(CFrame.new(target))
+                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                         task.wait(0.1)
                     end
                 end
@@ -869,6 +870,7 @@ AuraTab:AddToggle("Enemy", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
+            MainToggle.KillAura = true
             RunFunctions.ActiveAura(Value)
         end)
 	end,
@@ -881,6 +883,7 @@ AuraTab:AddToggle("ChopTree", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
+            MainToggle.TreeAura = true
             RunFunctions.ActiveAura(Value)
         end)
 	end,
