@@ -21,6 +21,7 @@ local Tabs = {
     Main = Window:AddTab({ Title = "Main", Icon = "home" }),
     Item = Window:AddTab({ Title = "Bring Items", Icon = "box" }),
     AttackAura = Window:AddTab({ Title = "Attack Aura", Icon = "sword" }),
+    Teleport = Window:AddTab({ Title = "Teleport", Icon = "activity" }),
     Esp = Window:AddTab({ Title = "Visual", Icon = "eye" }),    
     Credit = Window:AddTab({ Title = "Credit", Icon = "bookmark" }),
     Settings = Window:AddTab({ Title = "Settings", Icon = "settings" })
@@ -33,6 +34,7 @@ local LocalPlayer = game.Players.LocalPlayer
 local ProximityPromptService = game:GetService('ProximityPromptService')
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
+
 ---\ Toggle /---
 local MainToggle = {
     Hitbox = false,
@@ -49,8 +51,14 @@ local MainToggle = {
     Food = false,
     AutoPlant = false,
     ActiveAllCode = false,
-    ActiveEsp = false
+    ActiveEsp = false,
+    AutoEat = false
 }
+
+local TeleportToggle = {
+    Campfire = false
+}
+
 local EspToggle = {
     Animals = false,
     Items = false
@@ -62,7 +70,8 @@ local MainConnection = {
     InstantInteract = nil,
     WalkSpeed = nil,
     NoFog = nil,
-    NoFogRemoved = nil
+    NoFogRemoved = nil,
+    AutoEat = nil
 }
 
 local EspConnection = {
@@ -70,6 +79,10 @@ local EspConnection = {
     AnimalsRemoved = nil,
     Items = nil,
     ItemsRemoved = nil
+}
+
+local TeleportConnection = {
+    Campfire = nil
 }
 ---\ Variables /---
 local MainVariable = {
@@ -112,12 +125,52 @@ local SavedItems = setmetatable({}, { __mode = "k" })
 local SavedEspAnimal = setmetatable({}, { __mode = "k" })
 local SavedChest = {}
 local SelectedItem = {}
+local SelectedFood = {}
 local ActiveHighlight = false
 local Humanoid = LocalPlayer.Character:WaitForChild("Humanoid")
 local SavedWalkSpeed = Humanoid.WalkSpeed or 20
 local WalkSpeedValue = 30
+local persen = 20
 ---\ Functions /---
 task.wait(0.1)
+local function EatFood()
+    for _, v in pairs(workspace.Items:GetChildren()) do
+        local bar = game:GetService("Players").LocalPlayer.PlayerGui.Interface.StatBars.HungerBar.Bar
+        if bar.Size.X.Scale >= 1 then
+            break
+        end
+        for _, isi in pairs(SelectedFood) do
+            if isi == 'Cooked Food' and v.Name:lower():match('cook') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+            if isi == 'Raw Food' and (v.Name == 'Morsel' or v.Name == 'Steak') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+            if isi == 'Vegetable Food' and not v.Name:lower():match('morsel') and not v.Name:lower():match('steak') and v:GetAttribute('RestoreHunger') then
+                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+            end
+        end
+    end
+end
+
+local function AutoEatFood(state)
+    MainToggle.AutoEat = state
+    if MainToggle.AutoEat then
+        local bar = game:GetService("Players").LocalPlayer.PlayerGui.Interface.StatBars.HungerBar.Bar
+        MainConnection.AutoEat = bar:GetPropertyChangedSignal("Size"):Connect(function()
+            local getresult = persen / 100 * 1
+            if bar.Size.X.Scale <= getresult then
+                EatFood()
+            end
+        end)
+    else
+        if MainConnection.AutoEat then
+            MainConnection.AutoEat:Disconnect()
+            MainConnection.AutoEat = nil
+        end
+    end
+end
+
 local function AutoPlant()
     pcall(function()
         for _, v in ipairs(workspace.Items:GetChildren()) do
@@ -140,6 +193,7 @@ local function AutoPlant()
                     local result = workspace:Raycast(origin, direction, raycastParams)
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestPlantItem"):InvokeServer(v, result.Position)
                 end
+                task.wait(0.2)
             end
         end
     end)
@@ -172,15 +226,15 @@ local function BringFood(target, click)
     end)
 end
 
-local function BringScrap(target, click)
+local function BringScrap(target)
     workspace.StreamingEnabled = false
-    pcall(function()
+    local success, err = pcall(function()
         for i, v in pairs(workspace.Items:GetChildren()) do
-            if v:IsA('Model') and v.Parent == workspace.Items and v:GetAttribute('Scrappable') then
+            if v:IsA('Model') and v:GetAttribute('Scrappable') then
                 local distance = (v:GetPivot().Position - target).Magnitude
-                if distance > 7 and v.PrimaryPart then
+                if distance > 7 and v.Parent == workspace.Items then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    repeat task.wait() until tostring(v:GetAttribute("Owner")) == tostring(LocalPlayer.UserId)
+                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
                     v:PivotTo(CFrame.new(target))
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     task.wait(0.1)
@@ -188,6 +242,9 @@ local function BringScrap(target, click)
             end
         end
     end)
+    if not success then
+        print(tostring(err))
+    end
 end
 
 local function BringFuel(target, blacklist)
@@ -199,9 +256,10 @@ local function BringFuel(target, blacklist)
                 local isLogOrChair = nameLower:match('log') or nameLower:match('chair')
                 if (blacklist == 'ExceptLog' and not isLogOrChair) or (blacklist == 'ExceptGas' and isLogOrChair) or (blacklist ~= 'ExceptLog' and blacklist ~= 'ExceptGas') then
                     local distance = (v:GetPivot().Position - target).Magnitude
-                    if distance > 7 and v.PrimaryPart then
+                    if distance > 15 and v.PrimaryPart then
                         game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         v:PivotTo(CFrame.new(target))
+                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                         task.wait(0.1)
                     end
                 end
@@ -454,7 +512,7 @@ local function ActiveAllCode(state)
                     MainVariable.BringFuel2 = true
                     task.spawn(function()
                         pcall(function()
-                            BringFuel(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0), 'ExceptLog')
+                            BringFuel(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 15, 0), 'ExceptLog')
                         end)
                         MainVariable.BringFuel2 = false
                     end)
@@ -486,8 +544,6 @@ local function ActiveAllCode(state)
     if not MainToggle.Scrapper and (MainVariable.BringFuel1 or MainVariable.BringScrap) then
         MainVariable.BringFuel1 = false
         MainVariable.BringScrap = false
-        SavedScrap = {}
-        SavedScrap = setmetatable({}, { __mode = "k" })
     end
     if not MainToggle.AutoPlant and MainVariable.AutoPlant then
         MainVariable.AutoPlant = false
@@ -515,67 +571,6 @@ local function RestoreModel(model)
         hrp.CanCollide = true
     end
     SavedHitbox[model] = nil
-end
-
-local function HitboxExpander123(state)
-    MainToggle.Hitbox = state
-    if MainToggle.Hitbox then
-        MainConnection.HitboxRemove = workspace.Characters.ChildRemoved:Connect(RestoreModel)
-        MainConnection.Hitbox = workspace.Items.ChildAdded:Connect(RestoreModel)
-        task.spawn(function()
-            while MainToggle.Hitbox do
-                if MainToggle.Hitbox == false then
-                    break
-                end
-                if count > 10 then
-                    task.wait(0.7)
-                    count = 0
-                end
-                local success, err = pcall(function()
-                    for _, v in pairs(workspace.Characters:GetChildren()) do
-                        if not SavedHitbox[v] and v:IsA('Model') then
-                            if not v.Name:lower():match('child') and not v.Name:lower():match('trader') then
-                                local hrp = v:FindFirstChild('HumanoidRootPart')
-                                if hrp and hrp.Size ~= Vector3.new(HitboxSize, HitboxSize, HitboxSize) or hrp.Transparency ~= HitboxTransparency or hrp.CanCollide == true then
-                                    SavedHitbox[v] = {
-                                        Size = hrp.Size,
-                                        Transparency = hrp.Transparency
-                                    }
-                                    hrp.Size = Vector3.new(HitboxSize, HitboxSize, HitboxSize)
-                                    hrp.Transparency = HitboxTransparency
-                                    hrp.CanCollide = false
-                                end
-                            end
-                        end
-                    end
-                end)
-                count = count + 1
-                task.wait()
-            end
-        end)
-    else
-        if MainConnection.HitboxRemove then
-            MainConnection.HitboxRemove:Disconnect()
-            MainConnection.HitboxRemove = nil
-        end
-        if MainConnection.Hitbox then
-            MainConnection.Hitbox:Disconnect()
-            MainConnection.Hitbox = nil
-        end
-        for _, v in pairs(workspace.Characters:GetChildren()) do
-            task.spawn(function()
-                local hrp = v:FindFirstChild('HumanoidRootPart')
-                if hrp and SavedHitbox[v] then
-                    local saved = SavedHitbox[v]
-                    hrp.Size = Vector3.new(saved.X, saved.Y, saved.Z)
-                    hrp.Transparency = saved.Transparency
-                    hrp.CanCollide = true
-                    SavedHitbox[v] = nil
-                end
-            end)
-        end
-        SavedHitbox = {}
-    end
 end
 
 local function ApplyHitbox(obj)
@@ -715,44 +710,6 @@ local function HitboxExpander(state)
     end
 end
 
-local function HitboxExpandersaa(state)
-    MainToggle.Hitbox = state
-    if MainToggle.Hitbox then
-        for i, v in pairs(workspace.Characters:GetChildren()) do
-            if v:IsA('Model') and not v.Name:lower():match('child') and not v.Name:lower():match('trader') then
-                ProcessHitbox(v)
-            end
-        end
-        MainConnection.Hitbox = workspace.Characters.ChildAdded:Connect(function(model)
-            if model:IsA('Model') and not model.Name:lower():match('child') and not model.Name:lower():match('trader') then
-                ProcessHitbox(model)
-            end
-        end)
-        MainConnection.HitboxRemove = workspace.Items.ChildAdded:Connect(RestoreModel)
-    else
-        if MainConnection.Hitbox then
-            MainConnection.Hitbox:Disconnect()
-            MainConnection.Hitbox = nil
-        end
-        if MainConnection.HitboxRemove then
-            MainConnection.HitboxRemove:Disconnect()
-            MainConnection.HitboxRemove = nil
-        end
-        for _, v in pairs(workspace.Characters:GetChildren()) do
-            task.spawn(function()
-                local hrp = v:FindFirstChild('HumanoidRootPart')
-                if hrp and SavedHitbox[v] then
-                    local saved = SavedHitbox[v]
-                    hrp.Size = saved.Size
-                    hrp.Transparency = saved.Transparency
-                    hrp.CanCollide = true
-                    SavedHitbox[v] = nil
-                end
-            end)
-        end
-    end
-end
-
 local function ApplyESP(obj, type, attribute)
     local folder = obj:FindFirstChild('NevcitESP') or Instance.new('Folder', obj)
     folder.Name = 'NevcitESP'
@@ -827,7 +784,7 @@ local function restoreEsp(obj)
 end
 
 local function ActiveEsp()
-    if EspToggle.Animals and not EspVariable.Animals then
+    if EspToggle.Animals and not EspConnection.Animals then
         for _, v in pairs(workspace.Characters:GetChildren()) do
             task.spawn(function()
                 task.wait(0.1)
@@ -842,7 +799,7 @@ local function ActiveEsp()
                 end
             end)
         end
-        EspVariable.Animals = workspace.Characters.ChildAdded:Connect(function(v)
+        EspConnection.Animals = workspace.Characters.ChildAdded:Connect(function(v)
             task.spawn(function()
                 task.wait(0.1)
                 local lower = v.Name:lower()
@@ -857,7 +814,7 @@ local function ActiveEsp()
             end)
         end)
     end
-    if EspToggle.Items and not EspVariable.Items then
+    if EspToggle.Items and not EspConnection.Items then
         for _, child in pairs(workspace.Items:GetChildren()) do
             task.spawn(function()
                 task.wait(0.15)
@@ -890,7 +847,7 @@ local function ActiveEsp()
                 end
             end)
         end
-        EspVariable.Items = workspace.Items.ChildAdded:Connect(function(child)
+        EspConnection.Items = workspace.Items.ChildAdded:Connect(function(child)
             task.spawn(function()
                 task.wait(0.15)
                 if not child:FindFirstChild('NevcitESP') then
@@ -923,9 +880,9 @@ local function ActiveEsp()
             end)
         end)
     end
-    if not EspToggle.Animals and EspVariable.Animals then
-        EspVariable.Animals:Disconnect()
-        EspVariable.Animals = nil
+    if not EspToggle.Animals and EspConnection.Animals then
+        EspConnection.Animals:Disconnect()
+        EspConnection.Animals = nil
         for _, v in pairs(workspace.Characters:GetDescendants()) do
             if v.Name == 'NevcitESP' then
                 v:Destroy()
@@ -933,105 +890,14 @@ local function ActiveEsp()
             task.wait()
         end
     end
-    if not EspToggle.Items and EspVariable.Items then
-        EspVariable.Items:Disconnect()
-        EspVariable.Items = nil
+    if not EspToggle.Items and EspConnection.Items then
+        EspConnection.Items:Disconnect()
+        EspConnection.Items = nil
         for _, v in pairs(workspace.Items:GetDescendants()) do
             if v.Name == 'NevcitESP' then
                 v:Destroy()
             end
             task.wait()
-        end
-    end
-end
-
-local function ActiveEsp123(state)
-    MainToggle.ActiveEsp = state
-    if MainToggle.ActiveEsp then
-        if MainVariable.ActiveEsp then return end
-        MainVariable.ActiveEsp = true
-        task.spawn(function()
-            while EspToggle.Animals or EspToggle.Items do
-                task.wait(0.2)
-                if EspToggle.Animals and not EspVariable.Animals then
-                    EspVariable.Animals = true
-                    task.spawn(function()
-                        pcall(function()
-                            local mobList = GetMob('EspAnimals')
-                            local batchSize = 20
-                            for i = 1, #mobList, batchSize do
-                                for j = i, math.min(i + batchSize - 1, #mobList) do
-                                    local v = mobList[j]
-                                    if v and not v:FindFirstChild('NevcitESP') then
-                                        ApplyESP(v, 'NevcitESPAnimal')
-                                    end
-                                end
-                                task.wait()
-                            end
-                        end)
-                        EspVariable.Animals = false
-                    end)
-                end
-                if EspToggle.Items and not EspVariable.Items then
-                    EspVariable.Items = true
-                    task.spawn(function()
-                        pcall(function()
-                            local itemList = GetItem()
-                            local batchSize = 10
-                            for i = 1, #itemList, batchSize do
-                                for j = i, math.min(i + batchSize - 1, #itemList) do
-                                    local child = itemList[j]
-                                    if not child then continue end
-                                    for key, isi in pairs(SelectedItem) do
-                                        if (key == 'Chest' or isi == 'Chest') and child.Name:lower():match('chest') and not child:GetAttribute(tostring(LocalPlayer.UserId) .. 'Opened') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Chest')
-                                        end
-                                        if (key == 'Fuel' or isi == 'Fuel') and (child:GetAttribute('BurnFuel') or child:GetAttribute('FuelBurn')) then
-                                            ApplyESP(child, 'NevcitESPItem', 'Fuel')
-                                        end
-                                        if (key == 'Scrap' or isi == 'Scrap') and child:GetAttribute('Scrappable') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Scrap')
-                                        end
-                                        if (key == 'Tool' or isi == 'Tool') and child:GetAttribute('Interaction') and tostring(child:GetAttribute('Interaction')) == 'Tool' then
-                                            ApplyESP(child, 'NevcitESPItem', 'Tool')
-                                        end
-                                        if (key == 'Ammo' or isi == 'Ammo') and child.Name:lower():match('ammo') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Ammo')
-                                        end
-                                        if (key == 'Food' or isi == 'Food') and child:GetAttribute('RestoreHunger') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Food')
-                                        end
-                                    end
-                                end
-                                task.wait()
-                            end
-                        end)
-                        EspVariable.Items = false
-                    end)
-                end
-            end
-        end)
-    elseif not EspToggle.Animals and not EspToggle.Items then
-        MainVariable.ActiveEsp = false
-    end
-    if not EspToggle.Animals then
-        EspVariable.Animals = false
-        for i, v in pairs(workspace.Characters:GetChildren()) do
-            task.spawn(function()
-                if v:FindFirstChild('NevcitESP') then
-                    v.NevcitESP:Destroy()
-                end
-            end)
-        end
-    end
-    if not EspToggle.Items then
-        EspVariable.Items = false
-        for i, v in pairs(workspace.Items:GetChildren()) do
-            task.spawn(function()
-                if v:FindFirstChild('NevcitESP') then
-                    v.NevcitESP:Destroy()
-                end
-            end)
         end
     end
 end
@@ -1075,65 +941,6 @@ local function AddESPAnimals(state)
             if v:FindFirstChild('NevcitESP') then
                 v.NevcitESP:Destroy()
             end
-        end
-    end
-end
-
-local function AddESPAnimalsaa(state)
-    EspToggle.Animals = state
-    if EspToggle.Animals then
-        EspConnection.Animals = workspace.Characters.ChildRemoved:Connect(restoreEsp)
-        task.spawn(function()
-            while EspToggle.Animals do
-                if not EspToggle.Animals then
-                    break
-                end
-                if countesp > 10 then
-                    task.wait(0.6)
-                    countesp = 0
-                end
-                local success, err = pcall(function()
-                    for _, child in pairs(workspace.Characters:GetChildren()) do
-                        if child:IsA('Model') and not SavedEspAnimal[child] and not child.Name:lower():match('child') and not child.Name:match('Pelt Trader') and not Players:GetPlayerFromCharacter(child) then
-                            local nev = child:FindFirstChild('NevcitESP')
-                            local hrp = child:FindFirstChild('HumanoidRootPart')
-                            local hum = child:FindFirstChildOfClass('Humanoid')
-                            if nev and hrp then
-                                local mal = nev:FindFirstChild('NevcitESPAnimal')
-                                local tem = nev:FindFirstChild('NevcitESPItem')
-                                if not mal and not tem then
-                                    ApplyESP(child, 'NevcitESPAnimal')
-                                elseif not mal and tem then
-                                    tem:Destroy()
-                                    ApplyESP(child, 'NevcitESPAnimal')
-                                elseif mal and tem then
-                                    tem:Destroy()
-                                end
-                            elseif not nev and hrp then
-                                ApplyESP(child, 'NevcitESPAnimal')
-                            end
-                        end
-                    end
-                end)
-                countesp = countesp + 1
-                task.wait()
-            end
-        end)
-    else
-        if EspConnection.Animals then
-            EspConnection.Animals:Disconnect()
-            EspConnection.Animals = nil
-        end
-        for _, v in pairs(workspace.Characters:GetChildren()) do
-            task.spawn(function()
-                if v:IsA('Model') and SavedEspAnimal[v] then
-                    local nev = v:FindFirstChild('NevcitESP')
-                    if nev then
-                        nev:Destroy()
-                        SavedEspAnimal[v] = nil
-                    end
-                end
-            end)
         end
     end
 end
@@ -1210,145 +1017,6 @@ local function AddESPItems(state)
                 v.NevcitESP:Destroy()
             end
         end
-    end
-end
-
-        
-local function AddESPItemsaa(state)
-    EspToggle.Items = state
-    if EspToggle.Items then
-        EspConnection.Items = workspace.Items.ChildRemoved:Connect(restoreEsp)
-        task.spawn(function()
-            while EspToggle.Items do
-                if not EspToggle.Items then
-                    break
-                end
-                if countesp > 10 then
-                    task.wait(0.7)
-                    countesp = 0
-                end
-                local success, err = pcall(function()
-                    for _, child in pairs(workspace.Items:GetChildren()) do
-                        if SavedChest[child] then
-                            for name, value in pairs(child:GetAttributes()) do
-                                if name:lower():match(tostring(LocalPlayer.UserId)) and child:FindFirstChild('NevcitESP') then
-                                    child:FindFirstChild('NevcitESP'):Destroy()
-                                end
-                            end
-                        elseif not SavedEsp[child] and child:IsA('Model') and not child.Name:lower():match('child') then
-                            local nev = child:FindFirstChild('NevcitESP')
-                            if nev then
-                                local mal = nev:FindFirstChild('NevcitESPAnimal')
-                                local tem = nev:FindFirstChild('NevcitESPItem')
-                                for key, isi in pairs(SelectedItem) do
-                                    if (key == 'Chest' or isi == 'Chest') and not tem then
-                                        if child.Name:lower():match('chest') then
-                                            for name, value in pairs(child:GetAttributes()) do
-                                                if name:lower():match('open') and nev then
-                                                    nev:Destroy()
-                                                end
-                                            end
-                                            if not tem and not mal then
-                                                ApplyESP(child, 'NevcitESPItem', 'Chest')
-                                            elseif not tem and mal then
-                                                mal:Destroy()
-                                                ApplyESP(child, 'NevcitESPItem', 'Chest')
-                                            elseif tem and mal then
-                                                mal:Destroy()
-                                            end
-                                        end
-                                    end
-                                end
-                            else
-                                for key, isi in pairs(SelectedItem) do
-                                    if key == 'Fuel' or isi == 'Fuel' then
-                                        if child:GetAttribute('BurnFuel') or child:GetAttribute('FuelBurn') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Fuel')
-                                        end
-                                    end
-                                    if key == 'Scrap' or isi == 'Scrap' then
-                                        if child:GetAttribute('Scrappable') then
-                                            if not tem and not mal then
-                                                ApplyESP(child, 'NevcitESPItem', 'Scrap')
-                                            elseif not tem and mal then
-                                                mal:Destroy()
-                                                ApplyESP(child, 'NevcitESPItem', 'Scrap')
-                                            elseif tem and mal then
-                                                mal:Destroy()
-                                            end
-                                        end
-                                    end
-                                    if key == 'Tool' or isi == 'Tool' then
-                                        if child:GetAttribute('Interaction') and tostring(child:GetAttribute('Interaction')) == 'Tool' then
-                                            if not tem and not mal then
-                                                ApplyESP(child, 'NevcitESPItem', 'Tool')
-                                            elseif not tem and mal then
-                                                mal:Destroy()
-                                                ApplyESP(child, 'NevcitESPItem', 'Tool')
-                                            elseif tem and mal then
-                                                mal:Destroy()
-                                            end
-                                        end
-                                    end
-                                    if key == 'Chest' or isi == 'Chest' then
-                                        if child.Name:lower():match('chest') then
-                                            if not tem and not mal then
-                                                ApplyESP(child, 'NevcitESPItem', 'Chest')
-                                            elseif not tem and mal then
-                                                mal:Destroy()
-                                                ApplyESP(child, 'NevcitESPItem', 'Chest')
-                                            elseif tem and mal then
-                                                mal:Destroy()
-                                            end
-                                        end
-                                    end
-                                    if key == 'Ammo' or isi == 'Ammo' then
-                                        if child.Name:lower():match('ammo') then
-                                            if not tem and not mal then
-                                                ApplyESP(child, 'NevcitESPItem', 'Ammo')
-                                            elseif not tem and mal then
-                                                mal:Destroy()
-                                                ApplyESP(child, 'NevcitESPItem', 'Ammo')
-                                            elseif tem and mal then
-                                                mal:Destroy()
-                                            end
-                                        end
-                                    end
-                                    if key == 'Food' or isi == 'Food' then
-                                        if child:GetAttribute('RestoreHunger') then
-                                            ApplyESP(child, 'NevcitESPItem', 'Food')
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end
-                end)
-                countesp = countesp + 1
-                task.wait()
-            end
-        end)
-    else
-        if EspConnection.Items then
-            EspConnection.Items:Disconnect()
-            EspConnection.Items = nil
-        end
-        for _, v in pairs(workspace.Items:GetChildren()) do
-            task.spawn(function()
-                if v:IsA('Model') and SavedEsp[v] then
-                    local nev = v:FindFirstChild('NevcitESP')
-                    if nev then
-                        nev:Destroy()
-                        SavedEsp[v] = nil
-                        if SavedChest[v] then
-                            SavedChest[v] = nil
-                        end
-                    end
-                end
-            end)
-        end
-        SavedEsp = {}
-        SavedChest = {}
     end
 end
 
@@ -1435,6 +1103,32 @@ local function NoFog(state)
     end
 end
 
+local function TeleportTo(target)
+    if not target then return end
+    local char = LocalPlayer.Character
+    if not char then return end
+    char:PivotTo(CFrame.new(target))
+end
+
+local function AutoTeleportToCampfire(state)
+    TeleportToggle.Campfire = state
+    if TeleportToggle.Campfire then
+        if game.Lighting.ClockTime <= 0 then
+            TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position)
+        end
+        TeleportConnection.Campfire = game.Lighting.Changed:Connect(function(prop)
+            if tostring(prop) == 'ClockTime' and game.Lighting.ClockTime <= 0 then
+                TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
+            end
+        end)
+    else
+        if TeleportConnection.Campfire then
+            TeleportConnection.Campfire:Disconnect()
+            TeleportConnection.Campfire = nil
+        end
+    end
+end
+                
 ---\ MAIN TABS /---
 
 Tabs.Main:AddDropdown("Select Plant Position", {
@@ -1459,6 +1153,59 @@ Tabs.Main:AddToggle("Auto Plant Sapling",
         task.spawn(function()
             MainToggle.AutoPlant = state
             ActiveAllCode(state)
+        end)
+    end 
+})
+
+Tabs.Main:AddDropdown("Select Type Food", {
+    Title = "Select Type Food",
+    Description = "",
+    Values = {"Cooked Food", "Raw Food", "Vegetable Food"},
+    Multi = true,
+    Default = {},
+    Callback = function(Value)
+        SelectedFood = {}
+        if typeof(Value) == "table" then
+            for itemName, isSelected in pairs(Value) do
+                if isSelected then
+                    table.insert(SelectedFood, itemName)
+                end
+            end
+        else
+            SelectedFood = { tostring(Value) }
+        end
+    end
+})
+
+Tabs.Main:AddSlider("Eat Food When Hunger Reach (%)", 
+{
+    Title = "Eat Food When Hunger Reach (%)",
+    Description = "",
+    Default = 50,
+    Min = 1,
+    Max = 100,
+    Rounding = 0,
+    Callback = function(Value)
+        persen = Value
+    end
+})
+
+Tabs.Main:AddButton({
+    Title = "Eat Food",
+    Description = "",
+    Callback = function()
+        EatFood()
+    end
+})
+
+Tabs.Main:AddToggle("Auto Eat Food", 
+{
+    Title = "Auto Eat Food",
+    Description = "",
+    Default = false,
+    Callback = function(state)
+        task.spawn(function()
+            AutoEatFood(state)
         end)
     end 
 })
@@ -1626,7 +1373,7 @@ Tabs.Item:AddButton({
     Title = "Bring Scrap Item",
     Description = "",
     Callback = function()
-        BringScrap(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0), true)
+        BringScrap(LocalPlayer.Character.HumanoidRootPart.Position + Vector3.new(0, 7, 0))
     end
 })
 
@@ -1699,6 +1446,26 @@ Tabs.AttackAura:AddToggle("Active Tree Aura",
         task.spawn(function()
             MainToggle.TreeAura = state
             ActiveAura(state)
+        end)
+    end 
+})
+---\ TELEPORT TABS /---
+Tabs.Teleport:AddButton({
+    Title = "Teleport To Campfire",
+    Description = "",
+    Callback = function()
+        TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
+    end
+})
+
+Tabs.Teleport:AddToggle("Auto Teleport To Campfire", 
+{
+    Title = "Auto Teleport To Campfire",
+    Description = "Will Teleport When Night",
+    Default = false,
+    Callback = function(state)
+        task.spawn(function()
+            AutoTeleportToCampfire(state)
         end)
     end 
 })
