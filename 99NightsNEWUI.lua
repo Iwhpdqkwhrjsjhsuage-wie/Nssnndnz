@@ -910,7 +910,7 @@ BringTab:AddDropdown("TypeItem", {
 
 BringTab:AddToggle("AutoBringtoScrapper", {
 	Text = "Auto Bring to Scrapper",
-    ToolTip = "Bring Selected Type Item"
+    ToolTip = "Bring Selected Type Item",
 	Default = false,
 	Disabled = false,
 	Visible = true,
@@ -924,7 +924,7 @@ BringTab:AddToggle("AutoBringtoScrapper", {
 
 BringTab:AddToggle("AutoBringtoCampfire", {
 	Text = "Auto Bring to Campfire",
-    ToolTip = "Only Bring Fuel and Food"
+    ToolTip = "Only Bring Fuel and Food",
 	Default = false,
 	Disabled = false,
 	Visible = true,
