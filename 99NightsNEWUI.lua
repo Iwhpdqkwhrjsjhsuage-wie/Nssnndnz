@@ -1050,10 +1050,35 @@ OtherTab:AddToggle("AutoEatFood", {
 	end,
 })
 
-BringTab:AddButton({
+OtherTab:AddButton({
 	Text = "Eat Food",
 	Func = function()
 		Functions.EatFood()
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+local TeleportTab = Tabs.Main:AddRightGroupbox("Teleport", "")
+
+TeleportTab:AddToggle("AutoTeleportToCampfire", {
+	Text = "Auto Teleport To Campfire When Night",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.AutoTeleportToCampfire(Value)
+        end)
+	end,
+})
+
+TeleportTab:AddButton({
+	Text = "Teleport To Campfire",
+	Func = function()
+		Functions.TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
 	end,
 	DoubleClick = false,
 	Disabled = false,
