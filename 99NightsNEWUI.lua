@@ -1260,7 +1260,7 @@ HitboxTab:AddToggle("HitboxExpander", {
 	end,
 })
 
-local EspTab = Tabs.Main:AddLeftGroupbox("ESP", "")
+local EspTab = Tabs.Visual:AddLeftGroupbox("ESP", "")
 
 EspTab:AddDropdown("TypeEspItems", {
 	Values = { "Ammo", "Chest", "Fuel", "Food", "Tool", "Scrap" },
@@ -1307,7 +1307,7 @@ EspTab:AddToggle("EspAnimals", {
 	end,
 })
 
-local VisualTab = Tabs.Main:AddRightGroupbox("Other", "")
+local VisualTab = Tabs.Visual:AddRightGroupbox("Other", "")
 
 VisualTab:AddToggle("NoFog", {
 	Text = "No Fog",
