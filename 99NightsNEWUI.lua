@@ -1021,6 +1021,9 @@ OtherTab:AddInput("TextBoxHunger", {
 	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.PercentageHunger:SetValue(Value)
+        if tonumber(Value) > 99 then
+            Options.TextBoxTransparencyHitbox:SetValue(99)
+        end
 	end,
 })
 
@@ -1193,6 +1196,9 @@ HitboxTab:AddInput("TextBoxSizeHitbox", {
 	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.SizeHitbox:SetValue(Value)
+        if tonumber(Value) > 200 then
+            Options.TextBoxSizeHitbox:SetValue(200)
+        end
 	end,
 })
 
@@ -1221,6 +1227,9 @@ HitboxTab:AddInput("TextBoxTransparencyHitbox", {
 	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.TransparancyHitbox:SetValue(Value)
+        if tonumber(Value) > 1 then
+            Options.TextBoxTransparencyHitbox:SetValue(1)
+        end
 	end,
 })
 
