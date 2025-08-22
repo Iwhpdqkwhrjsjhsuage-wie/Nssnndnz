@@ -907,6 +907,7 @@ local Window = Library:CreateWindow({
 
 local Tabs = {
 	Main = Window:AddTab("Main", "user"),
+    Visual = Window:AddTab("Visual", "eye"),
 	["UI Settings"] = Window:AddTab("UI Settings", "settings"),
 }
 
@@ -975,7 +976,7 @@ AuraTab:AddToggle("Enemy", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            MainToggle.KillAura = true
+            MainToggle.KillAura = Value
             RunFunctions.ActiveAura(Value)
         end)
 	end,
@@ -988,7 +989,7 @@ AuraTab:AddToggle("ChopTree", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            MainToggle.TreeAura = true
+            MainToggle.TreeAura = Value
             RunFunctions.ActiveAura(Value)
         end)
 	end,
@@ -1061,7 +1062,7 @@ OtherTab:AddButton({
 	Risky = false,
 })
 
-local TeleportTab = Tabs.Main:AddRightGroupbox("Teleport", "")
+local TeleportTab = Tabs.Main:AddLeftGroupbox("Teleport", "")
 
 TeleportTab:AddToggle("AutoTeleportToCampfire", {
 	Text = "Auto Teleport To Campfire When Night",
@@ -1090,7 +1091,7 @@ local BringTab = Tabs.Main:AddRightGroupbox("Bring Items", "box")
 
 BringTab:AddDropdown("TypeItem", {
 	Values = { "Food", "Fuel", "Scrap" },
-	Default = 1,
+	Default = 0,
 	Multi = true, -- true / false, allows multiple choices to be selected
 	Text = "Type Item",
 	Callback = function(Value)
@@ -1116,8 +1117,8 @@ BringTab:AddToggle("AutoBringtoScrapper", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            MainToggle.Scrapper = state
-            RunFunctions.ActiveAllCode(state)
+            MainToggle.Scrapper = Value
+            RunFunctions.ActiveAllCode(Value)
         end)
 	end,
 })
@@ -1130,8 +1131,8 @@ BringTab:AddToggle("AutoBringtoCampfire", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            MainToggle.Campfire = state
-            RunFunctions.ActiveAllCode(state)
+            MainToggle.Campfire = Value
+            RunFunctions.ActiveAllCode(Value)
         end)
 	end,
 })
@@ -1245,7 +1246,69 @@ HitboxTab:AddToggle("HitboxExpander", {
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            RunFunctions.HitboxExpander(state)
+            RunFunctions.HitboxExpander(Value)
         end)
 	end,
 })
+
+local EspTab = Tabs.Main:AddLeftGroupbox("ESP", "")
+
+EspTab:AddDropdown("TypeEspItems", {
+	Values = { "Ammo", "Chest", "Fuel", "Food", "Tool", "Scrap" },
+	Default = 0,
+	Multi = true, -- true / false, allows multiple choices to be selected
+	Text = "Type Item",
+	Callback = function(Value)
+        SelectedItem = {}
+        if typeof(Value) == "table" then
+            for itemName, isSelected in pairs(Value) do
+                if isSelected then
+                    table.insert(SelectedItem, itemName)
+                end
+            end
+        else
+            SelectedItem = { tostring(Value) }
+        end
+	end,
+})
+
+EspTab:AddToggle("EspItems", {
+	Text = "Esp Items",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            EspToggle.Items = Value
+            RunFunctions.ActiveEsp()
+        end)
+	end,
+})
+
+EspTab:AddToggle("EspAnimals", {
+	Text = "Esp Animals",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            EspToggle.Animals = Value
+            RunFunctions.ActiveEsp()
+        end)
+	end,
+})
+
+local VisualTab = Tabs.Main:AddRightGroupbox("Other", "")
+
+VisualTab:AddToggle("NoFog", {
+	Text = "No Fog",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.NoFog(Value)
+        end)
+	end,
+})
+
