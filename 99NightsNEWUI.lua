@@ -1001,7 +1001,7 @@ RunFunctions.AutoCast = function(state)
                             direction = "down"
                         end
                     end
-                    if math.abs(barY - areaY) <= tolerance then
+                    if math.abs(barY - areaY) == 0 then
                         if direction == "up" and not clickedUp then
                             clickedUp = true
                             VirtualUser:CaptureController()
