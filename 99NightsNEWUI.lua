@@ -3,6 +3,7 @@
 local Players = game:GetService("Players")
 local LocalPlayer = game.Players.LocalPlayer or Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local workspace = game:GetService("Workspace")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local RunService = game:GetService("RunService")
@@ -134,7 +135,7 @@ Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
     local duration = distance / speed
 
     local tweenInfo = TweenInfo.new(
-        duration,
+        0.5,
         Enum.EasingStyle.Sine,
         Enum.EasingDirection.Out
     )
@@ -152,7 +153,8 @@ Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
     tween:Play()
     tween.Completed:Connect(function()
         if MovingModels[model] then
-            MovingModels[model] = nil 
+            MovingModels[model] = nil
+            RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(model)
             model.PrimaryPart.CanCollide = true
         end
     end)
@@ -166,13 +168,13 @@ Functions.EatFood = function()
         end
         for _, isi in pairs(SelectedFood) do
             if isi == 'Cooked Food' and v.Name:lower():match('cook') and v:GetAttribute('RestoreHunger') then
-                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+                RemoteEvents.RequestConsumeItem:InvokeServer(v)
             end
             if isi == 'Raw Food' and (v.Name == 'Morsel' or v.Name == 'Steak') and v:GetAttribute('RestoreHunger') then
-                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+                RemoteEvents.RequestConsumeItem:InvokeServer(v)
             end
             if isi == 'Vegetable Food' and not v.Name:lower():match('morsel') and not v.Name:lower():match('steak') and v:GetAttribute('RestoreHunger') then
-                game:GetService("ReplicatedStorage").RemoteEvents.RequestConsumeItem:InvokeServer(v)
+                RemoteEvents.RequestConsumeItem:InvokeServer(v)
             end
         end
     end
@@ -199,13 +201,13 @@ Functions.AutoPlant = function()
                     raycastParams.FilterDescendantsInstances = {v}
                     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
                     local result = workspace:Raycast(origin, direction, raycastParams)
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestPlantItem"):InvokeServer(v, result.Position)
+                    RemoteEvents:WaitForChild("RequestPlantItem"):InvokeServer(v, result.Position)
                 else
                     origin = LocalPlayer.Character:GetPivot().Position
                     raycastParams.FilterDescendantsInstances = {LocalPlayer.Character}
                     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
                     local result = workspace:Raycast(origin, direction, raycastParams)
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestPlantItem"):InvokeServer(v, result.Position)
+                    RemoteEvents:WaitForChild("RequestPlantItem"):InvokeServer(v, result.Position)
                 end
             end
         end
@@ -218,9 +220,8 @@ Functions.BringFood = function(target, click)
             if v:IsA('Model') and v:GetAttribute('RestoreHunger') and (click or not SavedFood[v]) then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 20 and v.PrimaryPart then
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                    RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                     Functions.MoveModel(v, target, 20)
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     if not click then
                         SavedFood[v] = true
                     end
@@ -238,9 +239,8 @@ Functions.BringScrap = function(target, click)
             if v:IsA('Model') and v.Parent == workspace.Items and v:GetAttribute('Scrappable') then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                    RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                     Functions.MoveModel(v, target, 20)
-                    game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     task.wait(0.1)
                 end
             end
@@ -258,9 +258,8 @@ Functions.BringFuel = function(target, blacklist)
                 if (blacklist == 'ExceptLog' and not isLogOrChair) or (blacklist == 'ExceptGas' and isLogOrChair) or (blacklist ~= 'ExceptLog' and blacklist ~= 'ExceptGas') then
                     local distance = (v:GetPivot().Position - target).Magnitude
                     if distance > 7 and v.PrimaryPart then
-                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                        RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         Functions.MoveModel(v, target, 20)
-                        game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                         task.wait(0.1)
                     end
                 end
