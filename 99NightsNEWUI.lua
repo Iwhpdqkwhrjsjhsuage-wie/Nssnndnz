@@ -24,7 +24,8 @@ local MainToggle = {
     AutoPlant = false,
     ActiveAllCode = false,
     ActiveEsp = false,
-    AutoEat = false
+    AutoEat = false,
+    MoveModel = false
 }
 
 local EspToggle = {
@@ -65,7 +66,8 @@ local MainVariable = {
     AutoCook = false,
     AutoPlant = false,
     ActiveMainCode = false,
-    ActiveEsp = false
+    ActiveEsp = false,
+    ActiveMoveModel = false
 }
 
 local EspVariable = {
@@ -131,7 +133,30 @@ Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
     local distance = (targetPos - startPos).Magnitude
     local duration = distance / speed
 
-    
+    local tweenInfo = TweenInfo.new(
+        duration,
+        Enum.EasingStyle.Sine,
+        Enum.EasingDirection.Out
+    )
+
+    local tween = TweenService:Create(model.PrimaryPart, tweenInfo, {Position = targetPos})
+
+    MovingModels[model] = {
+        Model = model,
+        Target = targetPos,
+        Tween = tween,
+        StartPos = startPos,
+        Active = true
+    }
+
+    tween:Play()
+    tween.Completed:Connect(function()
+        if MovingModels[model] then
+            MovingModels[model] = nil 
+            model.PrimaryPart.CanCollide = true
+        end
+    end)
+end
 
 Functions.EatFood = function()
     for _, v in pairs(workspace.Items:GetChildren()) do
@@ -194,7 +219,7 @@ Functions.BringFood = function(target, click)
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 20 and v.PrimaryPart then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    v:PivotTo(CFrame.new(target))
+                    Functions.MoveModel(v, target, 20)
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     if not click then
                         SavedFood[v] = true
@@ -214,7 +239,7 @@ Functions.BringScrap = function(target, click)
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    v:PivotTo(CFrame.new(target))
+                    Functions.MoveModel(v, target, 20)
                     game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                     task.wait(0.1)
                 end
@@ -234,7 +259,7 @@ Functions.BringFuel = function(target, blacklist)
                     local distance = (v:GetPivot().Position - target).Magnitude
                     if distance > 7 and v.PrimaryPart then
                         game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                        v:PivotTo(CFrame.new(target))
+                        Functions.MoveModel(v, target, 20)
                         game:GetService("ReplicatedStorage"):WaitForChild("RemoteEvents"):WaitForChild("StopDraggingItem"):FireServer(v)
                         task.wait(0.1)
                     end
@@ -665,7 +690,7 @@ RunFunctions.HitboxExpander = function(state)
     if MainToggle.Hitbox then
         task.spawn(function()
             while MainToggle.Hitbox do
-                local target = GetMob('Hitbox')
+                local target = Functions.GetMob('Hitbox')
                 for _, v in pairs(target) do
                     if v:FindFirstChild('HumanoidRootPart') and (v.HumanoidRootPart.Size ~= Vector3.new(HitboxSize, HitboxSize, HitboxSize) or v.HumanoidRootPart.CanCollide == true or v.HumanoidRootPart.Transparancy ~= HitboxTransparency) then
                         if not SavedHitbox[v] then
@@ -739,7 +764,7 @@ RunFunctions.ActiveAllCode = function(state)
                         end)
                     end
                 end
-                if MainToggle.Campfire and not MainVariable.BringFuel2 then
+                if MainToggle.Campfire and not MainVariable.BringFuel2 and BringFuelItems then
                     MainVariable.BringFuel2 = true
                     task.spawn(function()
                         pcall(function()
@@ -889,6 +914,49 @@ RunFunctions.AutoEatFood = function(state)
             MainConnection.AutoEat:Disconnect()
             MainConnection.AutoEat = nil
         end
+    end
+end
+
+RunFunctions.MoveModel = function(state)
+    MainToggle.MoveModel = state
+    if MainToggle.MoveModel then
+        if MainVariable.ActiveMoveModel then return end
+        MainVariable.ActiveMoveModel = true
+        local rayParams = RaycastParams.new()
+        rayParams.FilterType = Enum.RaycastFilterType.Blacklist
+        task.spawn(function()
+            while MainToggle.MoveModel do
+                for model, data in pairs(MovingModels) do
+                    if data.Active and model.PrimaryPart and model.PrimaryPart.Parent then
+                        local primary = model.PrimaryPart
+                        local dir = (data.Target - primary.Position)
+                        local dist = dir.Magnitude
+                        if dist > 1 then
+                            local result = workspace:Raycast(primary.Position, dir.Unit * dist, rayParams)
+                            if result then
+                                local hitName = result.Instance.Name
+                                local parentName = result.Instance.Parent and result.Instance.Parent.Name or ""
+
+                                if parentName == "Fog" then
+                                    data.Active = false
+                                    local stopTween = TweenService:Create(primary, TweenInfo(0.01), {Position = data.StartPos})
+                                    stopTween:Play()
+                                    MovingModels[model] = nil
+                                    primary.CanCollide = true
+                                elseif not parentName == "Fog" and not parentName == "" then
+                                    primary.CanCollide = false
+                                end
+                            end
+                        end
+                    else
+                        MovingModels[model] = nil
+                    end
+                end
+                task.wait(0.3)
+            end
+        end)
+    else
+        MainVariable.ActiveMoveModel = false
     end
 end
 
@@ -1136,6 +1204,7 @@ BringTab:AddToggle("AutoBringtoScrapper", {
 		task.spawn(function()
             MainToggle.Scrapper = Value
             RunFunctions.ActiveAllCode(Value)
+            RunFunctions.MoveModel(Value)
         end)
 	end,
 })
@@ -1150,6 +1219,7 @@ BringTab:AddToggle("AutoBringtoCampfire", {
 		task.spawn(function()
             MainToggle.Campfire = Value
             RunFunctions.ActiveAllCode(Value)
+            RunFunctions.MoveModel(Value)
         end)
 	end,
 })
