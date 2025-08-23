@@ -103,7 +103,7 @@ local BringScrapItems = false
 local AuraActive = false
 local CountRemote = 1
 local CountSpam = 0
-local MultipleAttack = false
+local MultipleAttack = true
 local AuraRange = 50
 local Speed = 0.2
 local HitboxSize = 42
@@ -249,7 +249,8 @@ Functions.BringFood = function(target, click)
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 20 and v.PrimaryPart then
                     RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    Functions.MoveModel(v, target, 20)
+                    v:PivotTo(CFrame.new(target))
+                    RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
                     if not click then
                         SavedFood[v] = true
                     end
@@ -268,7 +269,8 @@ Functions.BringScrap = function(target, click)
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
                     RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    Functions.MoveModel(v, target, 20)
+                    v:PivotTo(CFrame.new(target))
+                    RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
                     task.wait(0.1)
                 end
             end
@@ -287,7 +289,8 @@ Functions.BringFuel = function(target, blacklist)
                     local distance = (v:GetPivot().Position - target).Magnitude
                     if distance > 7 and v.PrimaryPart then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                        Functions.MoveModel(v, target, 20)
+                        v:PivotTo(CFrame.new(target))
+                        RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
                         task.wait(0.1)
                     end
                 end
