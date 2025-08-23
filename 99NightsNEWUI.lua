@@ -131,7 +131,7 @@ Functions.GetAllActiveToggle = function()
 end
 
 Functions.CollectCoin = function()
-    local request = RemoteEvents:WaitForChild("RequestCollectCoin")
+    local request = RemoteEvents:WaitForChild("RequestCollectCoints")
     for _, v in pairs(workspace.Items:GetChildren()) do
         if v.Name:match("Coin") then
             request:InvokeServer(v)
