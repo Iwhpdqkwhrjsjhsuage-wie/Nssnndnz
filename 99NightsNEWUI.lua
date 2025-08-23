@@ -248,12 +248,14 @@ Functions.BringFood = function(target, click)
             if v:IsA('Model') and v:GetAttribute('RestoreHunger') and (click or not SavedFood[v]) then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 20 and v.PrimaryPart then
-                    RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    v:PivotTo(CFrame.new(target))
-                    RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
-                    if not click then
-                        SavedFood[v] = true
-                    end
+                    task.spawn(function() 
+                        RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                        v:PivotTo(CFrame.new(target))
+                        RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
+                        if not click then
+                            SavedFood[v] = true
+                        end
+                    end)
                     task.wait(0.1)
                 end
             end
@@ -268,9 +270,20 @@ Functions.BringScrap = function(target, click)
             if v:IsA('Model') and v.Parent == workspace.Items and v:GetAttribute('Scrappable') then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
-                    RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                    v:PivotTo(CFrame.new(target))
-                    RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
+                    task.spawn(function() 
+                        RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                        v:PivotTo(CFrame.new(target))
+                        for _, part in pairs(v:GetDescendants()) do
+                            if part:IsA("BasePart") or part:IsA("Part") or part:IsA("MeshPart") then
+                                if part.Anchored and part.Anchored == true then
+                                    part.Anchored = false
+                                else
+                                    warn(part.Name .. "Failed Get Property Anchored")
+                                end
+                            end
+                        end
+                        RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
+                    end)
                     task.wait(0.1)
                 end
             end
@@ -290,7 +303,20 @@ Functions.BringFuel = function(target, blacklist)
                     if distance > 7 and v.PrimaryPart then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         v:PivotTo(CFrame.new(target))
-                        RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)
+                        RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)task.spawn(function() 
+                        RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
+                        v:PivotTo(CFrame.new(target))
+                        for _, part in pairs(v:GetDescendants()) do
+                            if part:IsA("BasePart") or part:IsA("Part") or part:IsA("MeshPart") then
+                                if part.Anchored and part.Anchored == true then
+                                    part.Anchored = false
+                                else
+                                    warn(part.Name .. "Failed Get Property Anchored")
+                                end
+                            end
+                        end
+                        RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
+                    end)
                         task.wait(0.1)
                     end
                 end
