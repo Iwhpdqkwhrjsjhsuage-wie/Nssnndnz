@@ -6,6 +6,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local workspace = game:GetService("Workspace")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
 ----\\ TOGGLES //----
 local MainToggle = {
     Hitbox = false,
@@ -84,6 +85,7 @@ local SavedFood = setmetatable({}, { __mode = "k" })
 local SavedScrap = setmetatable({}, { __mode = "k" })
 local SavedItems = setmetatable({}, { __mode = "k" })
 local SavedEspAnimal = setmetatable({}, { __mode = "k" })
+local MovingModels = setmetatable({}, { __mode = "kv" })
 
 local ActiveBringItems = false
 local PositionPlant = 'Random'
@@ -118,6 +120,18 @@ Functions.GetAllActiveToggle = function()
     end
     return false
 end
+
+Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
+    if not model.PrimaryPart then
+        warn(model.Name .. " PrimaryPart not found")
+        return
+    end
+
+    local startPos = model.PrimaryPart.Position
+    local distance = (targetPos - startPos).Magnitude
+    local duration = distance / speed
+
+    
 
 Functions.EatFood = function()
     for _, v in pairs(workspace.Items:GetChildren()) do
