@@ -985,10 +985,17 @@ RunFunctions.AutoCast = function(state)
         local bar = gui:WaitForChild("Bar")
         task.spawn(function()
             while MainToggle.AutoCast do
-                if Functions.IsInside(bar, successArea) and gui.Visible then
-                    VirtualUser:CaptureController()
-                    VirtualUser:ClickButton1(Vector2.new())
+                if gui.Parent.Visible then
+                    local barY = bar.Position.Y.Scale
+                    local areaY = successArea.Position.Y.Scale
+                    local areaHeight = successArea.Size.Y.Scale
+                    local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
+                    if math.abs(barY - areaY) <= tolerance then
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton1(Vector2.new())
+                    end
                 end
+                task.wait(0.1)
             end
         end)
     end
