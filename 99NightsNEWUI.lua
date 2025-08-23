@@ -1011,31 +1011,10 @@ RunFunctions.AutoCast = function(state)
                     local areaY = successArea.Position.Y.Scale
                     local areaHeight = successArea.Size.Y.Scale
                     local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
-                    if lastY then
-                        if barY < lastY then 
-                            direction = "up"
-                        elseif barY > lastY then
-                            direction = "down"
-                        end
-                    end
                     if (barY - areaY) <= 0.05 then
-                        if direction == "up" and not clickedUp then
-                            debounce = true
-                            VirtualUser:CaptureController()
-                            VirtualUser:ClickButton1(Vector2.new())
-                            task.delay(0.2, function() debounce = false end)
-                            clickedUp = true
-                            clickedUp = false 
-                        elseif direction == "down" and not clickedDown then
-                            debounce = true
-                            VirtualUser:CaptureController()
-                            VirtualUser:ClickButton1(Vector2.new())
-                            task.delay(0.2, function() debounce = false end)
-                            clickedDown = true
-                            clickedDown = false 
-                        end
+                        VirtualUser:CaptureController()
+                        VirtualUser:ClickButton1(Vector2.new())              
                     end
-                    lastY = barY
                 end
                 task.wait(0.05)
             end
