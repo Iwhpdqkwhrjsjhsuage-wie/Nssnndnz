@@ -994,7 +994,7 @@ RunFunctions.AutoCast = function(state)
                     local areaY = successArea.Position.Y.Scale
                     local areaHeight = successArea.Size.Y.Scale
                     local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
-                    if lasty then
+                    if lastY then
                         if barY < lastY then 
                             direction = "up"
                         elseif barY > lastY then
@@ -1012,7 +1012,7 @@ RunFunctions.AutoCast = function(state)
                             VirtualUser:CaptureController()
                             task.wait(0.1)
                             VirtualUser:ClickButton1(Vector2.new())
-                            clickedDown = false
+                            clickedDown = false 
                         end
                     end
                     lastY = barY
