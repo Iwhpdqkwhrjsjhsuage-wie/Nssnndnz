@@ -1,0 +1,3452 @@
+-- Decompiler will be improved VERY SOON!
+-- Decompiled with Konstant V2.1, a fast Luau decompiler made in Luau by plusgiant5 (https://discord.gg/brNTY8nX8t)
+-- Decompiled on 2025-08-23 16:21:32
+-- Luau version 6, Types version 3
+-- Time taken: 0.032630 seconds
+
+local module_upvr = {}
+module_upvr.__index = module_upvr
+module_upvr.Cooldown = 0.5
+local LocalPlayer_upvr = game.Players.LocalPlayer
+local Client_upvr = require(LocalPlayer_upvr.PlayerScripts.Client)
+local random_state_upvr = Random.new()
+local RunService_upvr = game:GetService("RunService")
+local RaycastParams_new_result1_upvr_2 = RaycastParams.new()
+RaycastParams_new_result1_upvr_2.FilterType = Enum.RaycastFilterType.Exclude
+local tbl_4_upvr = {{
+	Speed = 0.575;
+	ZoneSize = 0.27;
+	Goal = 2;
+	StartingProgress = 3;
+}, {
+	Speed = 0.61;
+	ZoneSize = 0.24;
+	Goal = 3;
+	StartingProgress = 3;
+}, {
+	Speed = 0.78;
+	ZoneSize = 0.12;
+	Goal = 6;
+	StartingProgress = 2;
+}, {
+	Speed = 0.86;
+	ZoneSize = 0.075;
+	Goal = 10;
+	StartingProgress = 1;
+	GoalLostOnFail = 4;
+}, {
+	Speed = 0.9;
+	ZoneSize = 0.04;
+	Goal = 12;
+	StartingProgress = 1;
+	GoalLostOnFail = 7;
+}}
+function module_upvr.new(arg1, arg2) -- Line 27
+	--[[ Upvalues[1]:
+		[1]: module_upvr (readonly)
+	]]
+	local setmetatable_result1 = setmetatable({}, module_upvr)
+	setmetatable_result1.Model = arg1
+	setmetatable_result1.RealModel = arg2
+	setmetatable_result1.LastCast = 0
+	setmetatable_result1.State = "Idle"
+	setmetatable_result1.CatchCount = 0
+	setmetatable_result1.LastPullTime = -5
+	setmetatable_result1.Debris = {}
+	return setmetatable_result1
+end
+local TweenService_upvr = game:GetService("TweenService")
+function module_upvr.Pull(arg1) -- Line 44
+	--[[ Upvalues[3]:
+		[1]: Client_upvr (readonly)
+		[2]: TweenService_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	local var15
+	if var15 then
+	else
+		var15 = true
+		arg1.AlreadyClickedThisPass = var15
+		var15 = false
+		local FishingCatchFrame_upvr = Client_upvr.Interface.FishingCatchFrame
+		local function _() -- Line 55, Named "flashSuccessBar"
+			--[[ Upvalues[2]:
+				[1]: TweenService_upvr (copied, readonly)
+				[2]: FishingCatchFrame_upvr (readonly)
+			]]
+			task.spawn(function() -- Line 56
+				--[[ Upvalues[2]:
+					[1]: TweenService_upvr (copied, readonly)
+					[2]: FishingCatchFrame_upvr (copied, readonly)
+				]]
+				TweenService_upvr:Create(FishingCatchFrame_upvr.TimingBar.SuccessArea, TweenInfo.new(0.02, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+				}):Play()
+				task.spawn(function() -- Line 59
+					--[[ Upvalues[2]:
+						[1]: TweenService_upvr (copied, readonly)
+						[2]: FishingCatchFrame_upvr (copied, readonly)
+					]]
+					wait(0.02)
+					TweenService_upvr:Create(FishingCatchFrame_upvr.TimingBar.SuccessArea, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+						BackgroundColor3 = Color3.fromRGB(0, 255, 0);
+					}):Play()
+				end)
+			end)
+		end
+		local Y_2 = FishingCatchFrame_upvr.TimingBar.SuccessArea.AbsolutePosition.Y
+		local var22 = FishingCatchFrame_upvr.TimingBar.SuccessArea.AbsolutePosition.Y + FishingCatchFrame_upvr.TimingBar.SuccessArea.AbsoluteSize.Y
+		local Y = FishingCatchFrame_upvr.TimingBar.Bar.AbsolutePosition.Y
+		local var24 = FishingCatchFrame_upvr.TimingBar.Bar.AbsolutePosition.Y + FishingCatchFrame_upvr.TimingBar.Bar.AbsoluteSize.Y
+		if Y_2 >= var24 or Y >= Y_2 or Y < var22 and var22 < var24 or Y_2 < Y and var24 < var22 then
+			var15 = true
+		end
+		if var15 then
+			arg1.CatchProgress += 1
+			Client_upvr.Sound.Play("FishHitMarker")
+			task.spawn(function() -- Line 56
+				--[[ Upvalues[2]:
+					[1]: TweenService_upvr (copied, readonly)
+					[2]: FishingCatchFrame_upvr (readonly)
+				]]
+				TweenService_upvr:Create(FishingCatchFrame_upvr.TimingBar.SuccessArea, TweenInfo.new(0.02, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+					BackgroundColor3 = Color3.fromRGB(255, 255, 255);
+				}):Play()
+				task.spawn(function() -- Line 59
+					--[[ Upvalues[2]:
+						[1]: TweenService_upvr (copied, readonly)
+						[2]: FishingCatchFrame_upvr (copied, readonly)
+					]]
+					wait(0.02)
+					TweenService_upvr:Create(FishingCatchFrame_upvr.TimingBar.SuccessArea, TweenInfo.new(0.05, Enum.EasingStyle.Quad, Enum.EasingDirection.InOut), {
+						BackgroundColor3 = Color3.fromRGB(0, 255, 0);
+					}):Play()
+				end)
+			end)
+		else
+			Client_upvr.Sound.Play("FishingMissedMarker")
+			arg1.CatchProgress -= arg1.GoalLostOnFail or 1
+		end
+		if arg1.CatchGoal <= arg1.CatchProgress then
+			arg1.ItemCaught = true
+			Client_upvr.Events.ConfirmCatchItem:FireServer()
+			Client_upvr.Sound.Play("FishCatch", {
+				Volume = 0.5;
+				Replicate = true;
+				ReplicationProperties = {
+					Instance = LocalPlayer_upvr.Character.Head;
+					Volume = 0.4;
+				};
+			})
+			arg1:Reel()
+			return
+		end
+		if arg1.CatchProgress <= 0 then
+			arg1.ItemCaught = nil
+			arg1:Reel()
+			return
+		end
+		if var15 then
+			arg1.LastPullTime = time()
+			Client_upvr.Events.PlayAnimation:Fire("Rod_Reel", {
+				Speed = 2;
+			})
+			Client_upvr.FirstPersonModule.PlayAnimation("Rod_Reel", nil, 4, 2)
+		elseif not var15 then
+			Client_upvr.Events.PlayAnimation:Fire("Rod_FailReel", {
+				Speed = 1;
+			})
+			Client_upvr.FirstPersonModule.PlayAnimation("Rod_FailReel", nil, 4, 1)
+		end
+		local var33 = arg1.CatchProgress / arg1.CatchGoal
+		FishingCatchFrame_upvr.SuccessBar.Bar.Size = UDim2.new(1, 0, var33, 0)
+		FishingCatchFrame_upvr.SuccessBar.Bar.BackgroundColor3 = GetProgressBarColour(var33)
+	end
+end
+function module_upvr.StartCatchTimer(arg1, arg2, arg3) -- Line 119
+	--[[ Upvalues[5]:
+		[1]: Client_upvr (readonly)
+		[2]: LocalPlayer_upvr (readonly)
+		[3]: tbl_4_upvr (readonly)
+		[4]: random_state_upvr (readonly)
+		[5]: RunService_upvr (readonly)
+	]]
+	arg1.CatchCount += 1
+	local RopeConstraint_4_upvr = arg1.Model.RopeAttach.RopeConstraint
+	task.spawn(function() -- Line 127
+		--[[ Upvalues[9]:
+			[1]: Client_upvr (copied, readonly)
+			[2]: arg1 (readonly)
+			[3]: arg2 (readonly)
+			[4]: arg3 (readonly)
+			[5]: LocalPlayer_upvr (copied, readonly)
+			[6]: RopeConstraint_4_upvr (readonly)
+			[7]: tbl_4_upvr (copied, readonly)
+			[8]: random_state_upvr (copied, readonly)
+			[9]: RunService_upvr (copied, readonly)
+		]]
+		local any_InvokeServer_result1 = Client_upvr.Events.StartCatchTimer:InvokeServer(arg1.RealModel, arg2, arg3)
+		if any_InvokeServer_result1 and any_InvokeServer_result1.Item and arg1.State == "Fishing" and arg1.Equipped then
+			Client_upvr.Events.PlayAnimation:Fire("Rod_FishHooked", {
+				Speed = 0.4;
+			})
+			Client_upvr.Sound.Play("FishBite", {
+				Volume = 0.5;
+				Replicate = true;
+				ReplicationProperties = {
+					Instance = LocalPlayer_upvr.Character.Head;
+					Volume = 0.4;
+				};
+			})
+			arg1.HookedItem = any_InvokeServer_result1.Item
+			local var40_upvr = RopeConstraint_4_upvr.Length / RopeConstraint_4_upvr.CurrentDistance
+			if 1 < var40_upvr then
+				local any_new_result1 = Client_upvr.TweenModule.new(function(arg1_2) -- Line 148
+					--[[ Upvalues[2]:
+						[1]: RopeConstraint_4_upvr (copied, readonly)
+						[2]: var40_upvr (readonly)
+					]]
+					RopeConstraint_4_upvr.Length = RopeConstraint_4_upvr.CurrentDistance * (var40_upvr - (var40_upvr - 1) * arg1_2)
+				end, 0.15)
+				any_new_result1:BindToComplete(function() -- Line 152
+					--[[ Upvalues[1]:
+						[1]: RopeConstraint_4_upvr (copied, readonly)
+					]]
+					RopeConstraint_4_upvr.Length = 3
+				end)
+				any_new_result1:Play()
+			else
+				RopeConstraint_4_upvr.Length = 3
+			end
+			local var44 = tbl_4_upvr[any_InvokeServer_result1.Difficulty]
+			local var45 = var44.StartingProgress or 3
+			arg1.CatchProgress = var45
+			arg1.CatchGoal = var44.Goal + var45
+			arg1.GoalLostOnFail = var44.GoalLostOnFail or 1
+			arg1.AlreadyClickedThisPass = false
+			local FishingCatchFrame_upvr_2 = Client_upvr.Interface.FishingCatchFrame
+			local var47 = arg1.CatchProgress / arg1.CatchGoal
+			FishingCatchFrame_upvr_2.SuccessBar.Bar.Size = UDim2.new(1, 0, var47, 0)
+			FishingCatchFrame_upvr_2.SuccessBar.Bar.BackgroundColor3 = GetProgressBarColour(var47)
+			FishingCatchFrame_upvr_2.TimingBar.SuccessArea.Size = UDim2.new(1, 0, var44.ZoneSize, 0)
+			FishingCatchFrame_upvr_2.TimingBar.SuccessArea.Position = UDim2.new(0.5, 0, random_state_upvr:NextInteger(15, (1 - var44.ZoneSize - 0.3) * 100) / 100, 0)
+			local any_GetPlatform_result1_upvr = Client_upvr.Utility.GetPlatform()
+			if any_GetPlatform_result1_upvr == "Mobile" then
+				FishingCatchFrame_upvr_2.Size = UDim2.new(0.18, 0, 0.8, 0)
+			end
+			local var49_upvw = 0
+			local Speed_upvr = var44.Speed
+			local var51_upvw = 0.1
+			local function update(arg1_3) -- Line 193
+				--[[ Upvalues[6]:
+					[1]: any_GetPlatform_result1_upvr (readonly)
+					[2]: var49_upvw (read and write)
+					[3]: Speed_upvr (readonly)
+					[4]: var51_upvw (read and write)
+					[5]: arg1 (copied, readonly)
+					[6]: FishingCatchFrame_upvr_2 (readonly)
+				]]
+				local var52
+				if any_GetPlatform_result1_upvr == "Mobile" then
+					var52 *= 0.85
+				end
+				var49_upvw += var52
+				local var53 = math.cos(var49_upvw * math.pi * 2 * Speed_upvr) * 0.45
+				if math.sign(var53) ~= math.sign(var51_upvw) then
+					arg1.AlreadyClickedThisPass = false
+				end
+				var51_upvw = var53
+				FishingCatchFrame_upvr_2.TimingBar.Bar.Position = UDim2.new(0.5, 0, (math.sin(var49_upvw * math.pi * 2 * Speed_upvr) / 2 + 0.5) * 0.9 + 0.05, 0)
+			end
+			RunService_upvr:BindToRenderStep("FishingCatchMinigame", Enum.RenderPriority.First.Value, update)
+			update(0)
+			FishingCatchFrame_upvr_2.Visible = true
+		end
+	end)
+end
+function GetProgressBarColour(arg1) -- Line 218
+	return Color3.fromHSV(70 * arg1 / 255, 1, 1)
+end
+function module_upvr.StartFishingAtLocation(arg1, arg2, arg3) -- Line 224
+	--[[ Upvalues[2]:
+		[1]: Client_upvr (readonly)
+		[2]: random_state_upvr (readonly)
+	]]
+	arg1.State = "Fishing"
+	local Model = arg1.Model
+	local RopeConstraint_7_upvr = Model.RopeAttach.RopeConstraint
+	local Hook_upvr = arg1.Hook
+	Client_upvr.GuiButtonHandler.ShowButton("Reel")
+	local _ = (Model.RopeAttach.Attachment.WorldCFrame.Position - arg3.Position).Unit
+	Client_upvr.Events.PlayerRodBobbleInWater:FireOtherClients(arg3)
+	Client_upvr.Utility.SpawnParticles("Splash_Cast", arg3)
+	local var58 = Client_upvr.PlayerHandler.HumanoidRootPart.Position + Vector3.new(0, 3, 0)
+	local clamped_upvw = math.clamp(((var58 - arg3.Position) * Vector3.new(1, 0, 1)).Magnitude + 10, 10, 100)
+	RopeConstraint_7_upvr.Length = RopeConstraint_7_upvr.CurrentDistance + (1 - math.clamp(((var58 - arg3.Position) * Vector3.new(1, 0, 1)).Magnitude / clamped_upvw, 0, 1)) * 2
+	local any_GetPivot_result1_5_upvw = Hook_upvr:GetPivot()
+	task.spawn(function() -- Line 266
+		--[[ Upvalues[7]:
+			[1]: arg1 (readonly)
+			[2]: Client_upvr (copied, readonly)
+			[3]: arg3 (readonly)
+			[4]: any_GetPivot_result1_5_upvw (read and write)
+			[5]: Hook_upvr (readonly)
+			[6]: clamped_upvw (read and write)
+			[7]: RopeConstraint_7_upvr (readonly)
+		]]
+		while arg1.Equipped and arg1.State == "Fishing" do
+			task.wait()
+			local var62 = Client_upvr.PlayerHandler.HumanoidRootPart.Position + Vector3.new(0, 3, 0)
+			local Magnitude = ((var62 + Vector3.new(0, 25 - var62.Y, 0) - arg3.Position) * Vector3.new(1, 0, 1)).Magnitude
+			if 0.01 < (any_GetPivot_result1_5_upvw.Position - arg3.Position).Magnitude then
+				local any_Lerp_result1 = any_GetPivot_result1_5_upvw:Lerp(arg3, 0.05)
+				any_GetPivot_result1_5_upvw = any_Lerp_result1
+				Hook_upvr:PivotTo(any_Lerp_result1)
+			end
+			if clamped_upvw + 0.01 < Magnitude then
+				print("too far")
+				arg1:Reel()
+			end
+			if not arg1.HookedItem then
+				RopeConstraint_7_upvr.Length = RopeConstraint_7_upvr.CurrentDistance + (1 - math.clamp(Magnitude / clamped_upvw, 0, 1)) * 2
+			end
+		end
+	end)
+	task.spawn(function() -- Line 296
+		--[[ Upvalues[4]:
+			[1]: arg1 (readonly)
+			[2]: random_state_upvr (copied, readonly)
+			[3]: Client_upvr (copied, readonly)
+			[4]: arg3 (readonly)
+		]]
+		while arg1.Equipped and arg1.State == "Fishing" do
+			local var68 = random_state_upvr:NextInteger(15, 35) / 10
+			repeat
+				local var69
+				local function INLINED_2() -- Internal function, doesn't exist in bytecode
+					var69 = var68 * 0.3
+					return var69
+				end
+				if not arg1.HookedItem or not INLINED_2() then
+					var69 = var68
+				end
+			until var69 <= 0 + task.wait(0.1) and not arg1.Equipped and arg1.State ~= "Fishing"
+			if arg1.Equipped then
+				if arg1.State == "Fishing" then
+					Client_upvr.Utility.SpawnParticles("Splash_Fishing", arg3)
+				end
+			end
+		end
+	end)
+	arg1:StartCatchTimer(arg2.Instance, arg3.Position)
+end
+Client_upvr.Events.PlayerCastRod:Connect(function(arg1, arg2) -- Line 318
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	if arg1 and arg1.Character then
+		local ToolHandle_3_upvr = arg1.Character:FindFirstChild("ToolHandle")
+		if ToolHandle_3_upvr then
+			for _, v in pairs(ToolHandle_3_upvr:GetChildren()) do
+				if v.Name == "NewBobber" then
+					v:Destroy()
+				end
+			end
+		end
+		if ToolHandle_3_upvr and ToolHandle_3_upvr:FindFirstChild("Bobber") then
+			local clone_2_upvr = ToolHandle_3_upvr.Bobber:Clone()
+			local pairs_result1_2, pairs_result2_14, pairs_result3_2 = pairs(clone_2_upvr:GetChildren())
+			for _, v_2 in pairs_result1_2, pairs_result2_14, pairs_result3_2 do
+				if v_2:IsA("BasePart") and v_2.Name ~= "BobberMain" then
+					v_2.Transparency = 0
+				end
+			end
+			clone_2_upvr.Name = "NewBobber"
+			clone_2_upvr.BobberMain.WeldConstraint:Destroy()
+			clone_2_upvr.Parent = ToolHandle_3_upvr
+			local RopeConstraint_8_upvr = ToolHandle_3_upvr.RopeAttach.RopeConstraint
+			pairs_result3_2 = clone_2_upvr.BobberMain
+			RopeConstraint_8_upvr.Attachment1 = pairs_result3_2.RopeAttachment
+			pairs_result3_2 = ToolHandle_3_upvr.Bobber:GetChildren()
+			local pairs_result1_10, pairs_result2_9, pairs_result3_19 = pairs(pairs_result3_2)
+			for _, v_3 in pairs_result1_10, pairs_result2_9, pairs_result3_19 do
+				if v_3:IsA("BasePart") then
+					v_3.Transparency = 1
+				end
+			end
+			local RaycastParams_new_result1_upvr = RaycastParams.new()
+			pairs_result2_9 = Enum.RaycastFilterType.Exclude
+			RaycastParams_new_result1_upvr.FilterType = pairs_result2_9
+			pairs_result2_9 = {}
+			pairs_result2_9[1] = workspace.Items
+			pairs_result2_9[2] = workspace.Particles
+			pairs_result2_9[3] = workspace.Map.Blockers
+			pairs_result2_9[4] = arg1.Character
+			RaycastParams_new_result1_upvr.FilterDescendantsInstances = pairs_result2_9
+			print(arg2)
+			local unpack_result1_upvr, unpack_result2_upvw, unpack_result3_upvw, unpack_result4_upvr = unpack(arg2)
+			local var95_upvw = false
+			local var96_upvw
+			task.spawn(function() -- Line 365
+				--[[ Upvalues[11]:
+					[1]: clone_2_upvr (readonly)
+					[2]: ToolHandle_3_upvr (readonly)
+					[3]: unpack_result3_upvw (read and write)
+					[4]: unpack_result4_upvr (readonly)
+					[5]: unpack_result2_upvw (read and write)
+					[6]: var95_upvw (read and write)
+					[7]: var96_upvw (read and write)
+					[8]: Client_upvr (copied, readonly)
+					[9]: RaycastParams_new_result1_upvr (readonly)
+					[10]: unpack_result1_upvr (readonly)
+					[11]: RopeConstraint_8_upvr (readonly)
+				]]
+				while true do
+					local var97
+					if not var97.Parent then break end
+					var97 = ToolHandle_3_upvr
+					if not var97.Parent then break end
+					local task_wait_result1_2 = task.wait()
+					var97 = clone_2_upvr.Parent
+					local function INLINED_3() -- Internal function, doesn't exist in bytecode
+						var97 = clone_2_upvr:GetAttribute("Reeling")
+						return var97
+					end
+					if var97 == nil or INLINED_3() then return end
+					var97 = unpack_result3_upvw
+					var97 += unpack_result4_upvr * task_wait_result1_2
+					unpack_result3_upvw = var97
+					var97 = unpack_result2_upvw + unpack_result3_upvw * task_wait_result1_2
+					if not var95_upvw then
+						var95_upvw = true
+						var97 = unpack_result2_upvw + unpack_result3_upvw.Unit * 1
+					end
+					var96_upvw = Client_upvr.CollisionUtility.GetProjectileHit(unpack_result2_upvw, var97, RaycastParams_new_result1_upvr)
+					if var96_upvw then break end
+					unpack_result2_upvw = var97
+					local var99 = unpack_result1_upvr + unpack_result2_upvw - unpack_result3_upvw.Unit * 1
+					clone_2_upvr:PivotTo(var99)
+					local var100 = Client_upvr.PlayerHandler.HumanoidRootPart.Position + Vector3.new(0, 3, 0)
+					RopeConstraint_8_upvr.Length = RopeConstraint_8_upvr.CurrentDistance + (1 - math.clamp(((var100 - var99.Position) * Vector3.new(1, 0, 1)).Magnitude / math.clamp(((var100 - var99.Position) * Vector3.new(1, 0, 1)).Magnitude + 10, 10, 100), 0, 1)) * 2
+				end
+				if var96_upvw then
+					clone_2_upvr:Destroy()
+				end
+			end)
+		end
+	end
+end)
+Client_upvr.Events.PlayerRodBobbleInWater:Connect(function(arg1, arg2) -- Line 411
+	if arg1 and arg1.Character then
+		local ToolHandle_5 = arg1.Character:FindFirstChild("ToolHandle")
+		if ToolHandle_5 and ToolHandle_5:FindFirstChild("Bobber") then
+			local clone_3 = ToolHandle_5.Bobber:Clone()
+			for _, v_4 in pairs(clone_3:GetChildren()) do
+				if v_4:IsA("BasePart") and v_4.Name ~= "BobberMain" then
+					v_4.Transparency = 0
+				end
+			end
+			clone_3.Name = "NewBobber"
+			clone_3.BobberMain.WeldConstraint:Destroy()
+			clone_3:PivotTo(arg2)
+			clone_3.Parent = ToolHandle_5
+			local RopeConstraint = ToolHandle_5.RopeAttach.RopeConstraint
+			RopeConstraint.Attachment1 = clone_3.BobberMain.RopeAttachment
+			RopeConstraint.Length = 0
+			for _, v_5 in pairs(ToolHandle_5.Bobber:GetChildren()) do
+				if v_5:IsA("BasePart") then
+					v_5.Transparency = 1
+				end
+			end
+		end
+	end
+end)
+Client_upvr.Events.PlayerRodReset:Connect(function(arg1, arg2) -- Line 442
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	if arg1 and arg1.Character then
+		local ToolHandle = arg1.Character:FindFirstChild("ToolHandle")
+		if ToolHandle and ToolHandle:FindFirstChild("NewBobber") and ToolHandle:FindFirstChild("Bobber") then
+			local function INLINED_5() -- Internal function, doesn't exist in bytecode
+				task.wait(0.65)
+				Client_upvr.TweenModule.new(function(arg1_5) -- Line 457
+					--[[ Upvalues[3]:
+						[1]: NewBobber_upvr (readonly)
+						[2]: Bobber_upvr (readonly)
+						[3]: any_GetPivot_result1_2_upvr (readonly)
+					]]
+					if not NewBobber_upvr or not NewBobber_upvr.Parent or not Bobber_upvr.Parent then
+						return true
+					end
+					NewBobber_upvr:PivotTo(any_GetPivot_result1_2_upvr:Lerp(Bobber_upvr:GetPivot(), arg1_5))
+				end, 0.65, "Quad"):Play()
+				local any_GetPivot_result1_2_upvr = NewBobber_upvr:GetPivot()
+				NewBobber_upvr:SetAttribute("Reeling", true)
+				local Bobber_upvr = ToolHandle.Bobber
+				local NewBobber_upvr = ToolHandle.NewBobber
+				ToolHandle.RopeAttach.RopeConstraint.Length = 0
+				return NewBobber_upvr.Parent
+			end
+			if arg2 and (not INLINED_5() or not Bobber_upvr.Parent) then return end
+			NewBobber_upvr = ToolHandle:GetChildren()
+			local pairs_result1_14, pairs_result2, pairs_result3_9 = pairs(NewBobber_upvr)
+			for _, v_6 in pairs_result1_14, pairs_result2, pairs_result3_9 do
+				if v_6.Name == "NewBobber" then
+					v_6:Destroy()
+				end
+			end
+			pairs_result3_9 = "Bobber"
+			if ToolHandle:FindFirstChild(pairs_result3_9) then
+				pairs_result2 = ToolHandle.RopeAttach
+				local RopeConstraint_10 = pairs_result2.RopeConstraint
+				pairs_result3_9 = ToolHandle.Bobber.BobberMain
+				pairs_result2 = pairs_result3_9.RopeAttachment
+				RopeConstraint_10.Attachment1 = pairs_result2
+				pairs_result2 = 0
+				RopeConstraint_10.Length = pairs_result2
+				pairs_result2 = pairs
+				pairs_result3_9 = ToolHandle.Bobber:GetChildren()
+				pairs_result2 = pairs_result2(pairs_result3_9)
+				for _, v_7 in pairs_result2(pairs_result3_9) do
+					if v_7:IsA("BasePart") and v_7.Name ~= "BobberMain" then
+						v_7.Transparency = 0
+					end
+				end
+			end
+		end
+	end
+end)
+local mouse_upvr = LocalPlayer_upvr:GetMouse()
+function module_upvr.Cast(arg1) -- Line 495
+	--[[ Upvalues[4]:
+		[1]: Client_upvr (readonly)
+		[2]: LocalPlayer_upvr (readonly)
+		[3]: mouse_upvr (readonly)
+		[4]: RaycastParams_new_result1_upvr_2 (readonly)
+	]]
+	print("Cast rod")
+	arg1.ItemHooked = nil
+	arg1.ItemCaught = nil
+	arg1.HookedItem = nil
+	Client_upvr.Sound.Play("FishCast", {
+		Volume = 0.5;
+		Replicate = true;
+		ReplicationProperties = {
+			Instance = LocalPlayer_upvr.Character.Head;
+			Volume = 0.4;
+		};
+	})
+	local var231
+	if LocalPlayer_upvr:GetAttribute("Class") == "Fisherman" and 2 <= (LocalPlayer_upvr:GetAttribute("ClassLevel") or 1) then
+		var231 = true
+	end
+	if var231 then
+		Client_upvr.Events.PlayAnimation:Fire("Rod_Cast", {
+			Speed = 4;
+		})
+		Client_upvr.FirstPersonModule.PlayAnimation("Rod_Cast", nil, 4, 4)
+		task.wait(0.05)
+	else
+		Client_upvr.Events.PlayAnimation:Fire("Rod_Cast")
+		Client_upvr.FirstPersonModule.PlayAnimation("Rod_Cast", nil, 4)
+		task.wait(0.45)
+	end
+	if not arg1.Equipped then
+	else
+		arg1.State = "Casting"
+		local Model_3 = arg1.Model
+		local Bobber = Model_3.Bobber
+		local any_GetPivot_result1_4 = Bobber:GetPivot()
+		if Client_upvr.FirstPersonModule.IsVisible() then
+			local any_GetTool_result1 = Client_upvr.FirstPersonModule.GetTool()
+			if any_GetTool_result1 then
+				any_GetPivot_result1_4 = any_GetTool_result1.Bobber:GetPivot()
+			end
+		end
+		local Position_2_upvw = any_GetPivot_result1_4.Position
+		local var238 = 50
+		if var231 then
+			var238 = 70
+		end
+		local var239_upvw = (mouse_upvr.Hit.Position - any_GetPivot_result1_4.Position).Unit * var238 + Vector3.new(0, 10, 0)
+		local clone_upvr = Bobber:Clone()
+		for _, v_13 in pairs(Bobber:GetChildren()) do
+			if v_13:IsA("BasePart") then
+				v_13.Transparency = 1
+			end
+		end
+		local any_GetTool_result1_4 = Client_upvr.FirstPersonModule.GetTool()
+		if any_GetTool_result1_4 then
+			for _, v_14 in pairs(any_GetTool_result1_4.Bobber:GetChildren()) do
+				if v_14:IsA("BasePart") then
+					v_14.Transparency = 1
+				end
+			end
+		end
+		for _, v_15 in pairs(clone_upvr:GetDescendants()) do
+			if v_15:IsA("BasePart") then
+				if v_15.Name ~= "BobberMain" then
+					v_15.Transparency = 0
+				end
+				v_15.CanCollide = false
+				v_15.Anchored = true
+			end
+		end
+		clone_upvr.PrimaryPart.WeldConstraint:Destroy()
+		arg1.Hook = clone_upvr
+		clone_upvr.Parent = workspace.Particles
+		local var251_upvw = any_GetPivot_result1_4 - any_GetPivot_result1_4.Position
+		Client_upvr.Events.PlayerCastRod:FireOtherClients({var251_upvw, Position_2_upvw, var239_upvw, Vector3.new(0, -60, 0)})
+		local var254_upvw = false
+		local var255_upvw
+		local RopeConstraint_9_upvr = Model_3.RopeAttach.RopeConstraint
+		task.spawn(function() -- Line 598
+			--[[ Upvalues[10]:
+				[1]: arg1 (readonly)
+				[2]: var239_upvw (read and write)
+				[3]: Position_2_upvw (read and write)
+				[4]: var254_upvw (read and write)
+				[5]: var255_upvw (read and write)
+				[6]: Client_upvr (copied, readonly)
+				[7]: RaycastParams_new_result1_upvr_2 (copied, readonly)
+				[8]: var251_upvw (read and write)
+				[9]: clone_upvr (readonly)
+				[10]: RopeConstraint_9_upvr (readonly)
+			]]
+			while arg1.Equipped and arg1.State == "Casting" do
+				local task_wait_result1 = task.wait()
+				var239_upvw += Vector3.new(0, -60, 0) * task_wait_result1
+				local var262 = Position_2_upvw + var239_upvw * task_wait_result1
+				if not var254_upvw then
+					var254_upvw = true
+					var262 = Position_2_upvw + var239_upvw.Unit * 1
+				end
+				var255_upvw = Client_upvr.CollisionUtility.GetProjectileHit(Position_2_upvw, var262, RaycastParams_new_result1_upvr_2)
+				if var255_upvw then break end
+				Position_2_upvw = var262
+				local var263 = var251_upvw + Position_2_upvw - var239_upvw.Unit * 1
+				clone_upvr:PivotTo(var263)
+				local var264 = Client_upvr.PlayerHandler.HumanoidRootPart.Position + Vector3.new(0, 3, 0)
+				RopeConstraint_9_upvr.Length = RopeConstraint_9_upvr.CurrentDistance + (1 - math.clamp(((var264 - var263.Position) * Vector3.new(1, 0, 1)).Magnitude / math.clamp(((var264 - var263.Position) * Vector3.new(1, 0, 1)).Magnitude + 10, 10, 100), 0, 1)) * 2
+			end
+			if not arg1.Equipped then
+			elseif var255_upvw then
+				if var255_upvw.Instance:HasTag("Water") then
+					Client_upvr.Sound.Play("FishBobber")
+					arg1:StartFishingAtLocation(var255_upvw, CFrame.new(var255_upvw.Position) + Vector3.new(0, 0, 0))
+					return
+				end
+				print("collision with land")
+				for _, v_16 in pairs(clone_upvr:GetChildren()) do
+					if v_16:IsA("BasePart") then
+						local var268 = true
+						if v_16.Name ~= "BobberMain" then
+							if v_16.Name ~= "Hook" then
+								var268 = false
+							else
+								var268 = true
+							end
+						end
+						v_16.CanCollide = var268
+						v_16.Anchored = false
+					end
+				end
+				clone_upvr.PrimaryPart.CanTouch = true
+				clone_upvr.PrimaryPart.CanQuery = true
+				RopeConstraint_9_upvr.Attachment1 = clone_upvr.PrimaryPart.RopeAttachment
+				clone_upvr.PrimaryPart.Touched:Connect(function(arg1_7) -- Line 659
+					--[[ Upvalues[1]:
+						[1]: arg1 (copied, readonly)
+					]]
+					if arg1_7:HasTag("Water") then
+						arg1:Reel()
+					end
+				end)
+				local maximum_upvr_2 = math.max(RopeConstraint_9_upvr.Length, 1)
+				task.spawn(function() -- Line 667
+					--[[ Upvalues[4]:
+						[1]: arg1 (copied, readonly)
+						[2]: clone_upvr (copied, readonly)
+						[3]: RopeConstraint_9_upvr (copied, readonly)
+						[4]: maximum_upvr_2 (readonly)
+					]]
+					while arg1.Equipped and arg1.State == "Casting" and clone_upvr.Parent ~= nil do
+						RopeConstraint_9_upvr.Length = math.clamp(RopeConstraint_9_upvr.CurrentDistance * 1.05, 1, maximum_upvr_2)
+						task.wait()
+					end
+				end)
+			end
+		end)
+	end
+end
+function module_upvr.Break(arg1) -- Line 679
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	print("time to break locally")
+	arg1.Broken = true
+	Client_upvr.InventoryHandler.ClearItemFromInventory(arg1.RealModel)
+end
+function module_upvr.CleanUp(arg1) -- Line 685
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	for _, v_8_upvr in pairs(arg1.Debris) do
+		if v_8_upvr.Name == "FishingParticles" then
+			task.delay(3, function() -- Line 688
+				--[[ Upvalues[1]:
+					[1]: v_8_upvr (readonly)
+				]]
+				v_8_upvr:Destroy()
+			end)
+		else
+			v_8_upvr:Destroy()
+		end
+	end
+	arg1.Debris = {}
+	Client_upvr.GuiButtonHandler.HideButton("Reel")
+end
+function module_upvr.Reel(arg1) -- Line 700
+	--[[ Upvalues[3]:
+		[1]: Client_upvr (readonly)
+		[2]: RunService_upvr (readonly)
+		[3]: LocalPlayer_upvr (readonly)
+	]]
+	if arg1.State == "Casting" or arg1.State == "Fishing" then
+		arg1.State = "Reeling"
+		Client_upvr.GuiButtonHandler.HideButton("Reel")
+		Client_upvr.Events.PlayerRodReset:FireOtherClients(true)
+		if not arg1.ItemCaught then
+			Client_upvr.Events.EndCatching:FireServer()
+		end
+		Client_upvr.Events.StopAnimation:Fire("Rod_FishHooked")
+		Client_upvr.Interface.FishingCatchFrame.Visible = false
+		RunService_upvr:UnbindFromRenderStep("FishingCatchMinigame")
+		local any_GetPivot_result1 = arg1.Hook:GetPivot()
+		arg1.ReelOrigin = any_GetPivot_result1
+		arg1.ReelPercent = 0
+		if arg1.ItemCaught then
+			if arg1.HookedItem and arg1.HookedItem:GetAttribute("BigCatch") then
+				Client_upvr.Utility.SpawnParticles("Splash_CatchBig", any_GetPivot_result1)
+			else
+				Client_upvr.Utility.SpawnParticles("Splash_Catch", any_GetPivot_result1)
+			end
+		end
+		arg1.Model.RopeAttach.RopeConstraint.Attachment1 = arg1.FakeAttachHook
+		local any_new_result1_2 = Client_upvr.TweenModule.new(function(arg1_8) -- Line 731
+			--[[ Upvalues[1]:
+				[1]: arg1 (readonly)
+			]]
+			arg1.ReelPercent = arg1_8
+		end, 0.65, "Quad")
+		any_new_result1_2:BindToComplete(function() -- Line 734
+			--[[ Upvalues[1]:
+				[1]: arg1 (readonly)
+			]]
+			arg1.State = "Idle"
+			arg1.LastCast = time()
+			arg1:ResetHook()
+			arg1:CleanUp()
+		end)
+		any_new_result1_2:Play()
+		Client_upvr.Sound.Play("FishReel", {
+			Volume = 0.55;
+			Replicate = true;
+			ReplicationProperties = {
+				Instance = LocalPlayer_upvr.Character.Head;
+				Volume = 0.3;
+			};
+		})
+		Client_upvr.Events.PlayAnimation:Fire("Rod_Reel", {
+			Speed = 2;
+		})
+		Client_upvr.FirstPersonModule.PlayAnimation("Rod_Reel", nil, 4, 2)
+	end
+end
+function module_upvr.ResetHook(arg1) -- Line 755
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	local Model_4 = arg1.Model
+	for _, v_9 in pairs(Model_4.Bobber:GetChildren()) do
+		if v_9:IsA("BasePart") and v_9.Name ~= "BobberMain" then
+			v_9.Transparency = 0
+		end
+	end
+	local any_GetTool_result1_5 = Client_upvr.FirstPersonModule.GetTool()
+	if any_GetTool_result1_5 then
+		for _, v_10 in pairs(any_GetTool_result1_5.Bobber:GetChildren()) do
+			if v_10:IsA("BasePart") and v_10.Name ~= "BobberMain" then
+				v_10.Transparency = 0
+			end
+		end
+	end
+	Model_4.RopeAttach.RopeConstraint.Length = 0
+	if arg1.Hook then
+		arg1.Hook:Destroy()
+		arg1.Hook = nil
+	end
+	Client_upvr.Events.PlayerRodReset:FireOtherClients()
+end
+function module_upvr.Activate(arg1) -- Line 788
+	if arg1.State == "Idle" then
+		if time() < arg1.LastCast + arg1.Cooldown then
+		else
+			arg1.LastCast = time()
+			arg1:Cast()
+		end
+	end
+	if arg1.State == "Casting" then
+		if time() < arg1.LastCast + arg1.Cooldown then
+		else
+			arg1.LastCast = time()
+			arg1:Reel()
+		end
+	end
+	if arg1.State == "Fishing" then
+		if arg1.HookedItem then
+			arg1:Pull()
+			return
+		end
+		if time() < arg1.LastCast + arg1.Cooldown then return end
+		arg1.LastCast = time()
+		arg1:Reel()
+	end
+end
+function module_upvr.Deactivate(arg1) -- Line 817
+end
+function module_upvr.UpdateHook(arg1) -- Line 821
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	task.spawn(function() -- Line 822
+		--[[ Upvalues[2]:
+			[1]: arg1 (readonly)
+			[2]: Client_upvr (copied, readonly)
+		]]
+		-- KONSTANTERROR: [0] 1. Error Block 1 start (CF ANALYSIS FAILED)
+		local Model_5 = arg1.Model
+		local RopeConstraint_5 = Model_5.RopeAttach.RopeConstraint
+		local Attachment_5 = Model_5.RopeAttach.Attachment
+		local Attachment_4 = Instance.new("Attachment")
+		Attachment_4.WorldCFrame = Attachment_5.WorldCFrame
+		Attachment_4.Parent = workspace.Terrain
+		local Attachment_3 = Instance.new("Attachment")
+		Attachment_3.WorldCFrame = Attachment_5.WorldCFrame
+		Attachment_3.Parent = workspace.Terrain
+		arg1.FakeAttachHook = Attachment_3
+		RopeConstraint_5.Attachment0 = Attachment_4
+		RopeConstraint_5.Attachment1 = Attachment_3
+		-- KONSTANTERROR: [0] 1. Error Block 1 end (CF ANALYSIS FAILED)
+		-- KONSTANTERROR: [266] 170. Error Block 34 start (CF ANALYSIS FAILED)
+		task.wait()
+		-- KONSTANTERROR: [266] 170. Error Block 34 end (CF ANALYSIS FAILED)
+		-- KONSTANTERROR: [54] 32. Error Block 2 start (CF ANALYSIS FAILED)
+		-- KONSTANTERROR: [54] 32. Error Block 2 end (CF ANALYSIS FAILED)
+	end)
+end
+function module_upvr.ToggleLevelParticles(arg1, arg2) -- Line 909
+	--[[ Upvalues[1]:
+		[1]: Client_upvr (readonly)
+	]]
+	for _, v_11 in pairs(arg1.Model:GetDescendants()) do
+		if v_11:IsA("ParticleEmitter") and v_11.Name == "UpgradeParticles" then
+			v_11.Enabled = arg2
+		end
+	end
+	if Client_upvr.FirstPersonModule.IsVisible() then
+		local any_GetTool_result1_2 = Client_upvr.FirstPersonModule.GetTool()
+		if any_GetTool_result1_2 then
+			for _, v_12 in pairs(any_GetTool_result1_2:GetDescendants()) do
+				if v_12:IsA("ParticleEmitter") and v_12.Name == "UpgradeParticles" then
+					v_12.Enabled = arg2
+				end
+			end
+		end
+	end
+end
+function module_upvr.TrackLevelUp(arg1) -- Line 928
+	arg1.RealModel:GetAttributeChangedSignal("XP"):Connect(function() -- Line 929, Named "update"
+		--[[ Upvalues[1]:
+			[1]: arg1 (readonly)
+		]]
+		local XP_2 = arg1.RealModel:GetAttribute("XP")
+		local LevelUpXP = arg1.RealModel:GetAttribute("LevelUpXP")
+		if XP_2 and LevelUpXP and LevelUpXP <= XP_2 then
+			arg1:ToggleLevelParticles(true)
+		else
+			arg1:ToggleLevelParticles(false)
+		end
+	end)
+	local XP = arg1.RealModel:GetAttribute("XP")
+	local LevelUpXP_2 = arg1.RealModel:GetAttribute("LevelUpXP")
+	if XP and LevelUpXP_2 then
+		if LevelUpXP_2 <= XP then
+			arg1:ToggleLevelParticles(true)
+			return
+		end
+	end
+	arg1:ToggleLevelParticles(false)
+end
+function module_upvr.OnEquip(arg1) -- Line 943
+	--[[ Upvalues[2]:
+		[1]: LocalPlayer_upvr (readonly)
+		[2]: RaycastParams_new_result1_upvr_2 (readonly)
+	]]
+	arg1.Equipped = true
+	RaycastParams_new_result1_upvr_2.FilterDescendantsInstances = {workspace.Items, workspace.Particles, workspace.Map.Blockers, LocalPlayer_upvr.Character}
+	arg1:UpdateHook()
+	arg1:TrackLevelUp()
+end
+function module_upvr.OnUnequip(arg1) -- Line 954
+	--[[ Upvalues[2]:
+		[1]: Client_upvr (readonly)
+		[2]: RunService_upvr (readonly)
+	]]
+	arg1.Equipped = false
+	Client_upvr.Events.EndCatching:FireServer()
+	Client_upvr.FirstPersonModule.StopAnimation("PullingRod")
+	Client_upvr.Events.StopAnimation:Fire("Rod_FishHooked")
+	Client_upvr.Interface.FishingCatchFrame.Visible = false
+	RunService_upvr:UnbindFromRenderStep("FishingCatchMinigame")
+	Client_upvr.GuiButtonHandler.HideButton("Reel")
+	arg1:ResetHook()
+	arg1:CleanUp()
+end
+return module_upvr
+
+-- // Function Dumper made by King.Kevin
+-- // Script Path: ReplicatedStorage.Tools.Fishing Rod
+
+--[[
+Function Dump: StartCatchTimer
+
+Function Upvalues: StartCatchTimer
+		1 [table]:
+		1 [table] table: 0x2efdf2a4aadc4f53
+				1 [table]:
+				FishPosterClient [table] table: 0x8bc45ec66627d993
+						1 [boolean] = true
+						2 [function] = Init
+				2 [table]:
+				HorseAndCaravanAnimation [table] table: 0x38eca511fc125cb3
+				3 [table]:
+				AlienMothershipClient [table] table: 0x0f1d9c1b2f348103
+						1 [boolean] = true
+						2 [function] = TeleportToEarth
+						3 [function] = TeleportToMothership
+						4 [function] = Init
+				4 [table]:
+				GemActivateClient [table] table: 0x24eecd4b286a6f23
+						1 [boolean] = true
+						2 [function] = Init
+						3 [function] = OpenMenu
+				5 [table]:
+				FrogModuleClient [table] table: 0x02e99f1ca2ebbbe3
+						1 [boolean] = true
+						2 [function] = Init
+				6 [table]:
+				ScavengerClass [table] table: 0x1b9d3b5669135f23
+						1 [boolean] = true
+						2 [function] = Init
+				7 [table]:
+				BaseDefenderClass [table] table: 0x8328729c9929f163
+						1 [boolean] = true
+						2 [function] = Init
+				8 [boolean] = true
+				9 [table]:
+				AimAssistClient [table] table: 0x0e0202e0f169bdd3
+						1 [function] = GetAimAssistDir
+						2 [boolean] = true
+						3 [function] = Init
+				10 [table]:
+				UFOSmokeClient [table] table: 0x868855fd03ed6a73
+						1 [function] = FadeOutAll
+				11 [table]:
+				GuiButtonHandler [table] table: 0xf0b4cfd6c17cc133
+						1 [function] = CreateTouchDeviceStoreButton
+						2 [function] = HideButton
+						3 [function] = GetCurrentPlatform
+						4 [function] = Init
+						5 [table]:
+						ActiveButtons [table] table: 0x1a7f9acdf3a15383
+						6 [function] = ShowButton
+						7 [boolean] = true
+				12 [table]:
+				LightHandler [table] table: 0xacfcaa26e2239f83
+						1 [boolean] = true
+						2 [function] = Init
+				13 [table]:
+				CamShake [table] table: 0x3ca4a3d7362e9b13
+						1 [function] = ShakeOnce
+						2 [function] = cameraSwaySecret
+						3 [function] = cameraSway
+						4 [function] = rumble
+				14 [table]:
+				LeafPileClient [table] table: 0x849c44824fcfcf63
+						1 [boolean] = true
+						2 [function] = Init
+						3 [function] = PileDug
+				15 [table]:
+				BulletReplicationModule [table] table: 0x7b43d7bde6c66953
+				16 [table]:
+				ParticlesClient [table] table: 0xd4f921340d6766e3
+				17 [table]:
+				PromptHandler [table] table: 0x71619bee7eecb753
+						1 [function] = HideAllPrompts
+						2 [function] = ShowAllPrompts
+						3 [function] = CheckInteractionCooldown
+						4 [boolean] = true
+						5 [function] = Init
+				18 [table]:
+				BiomesClient [table] table: 0x8e463be65c1daa73
+						1 [function] = GetBiome
+						2 [function] = GetBiomeXZ
+						3 [boolean] = true
+						4 [function] = GetCurrentBiome
+						5 [function] = Init
+				19 [table]:
+				AutoStackClient [table] table: 0xa10e936c019e7aa3
+				20 [table]:
+				Spring [table] table: 0xef0c854ace77ea03
+						1 [function] = _positionVelocity
+						2 [function] = TimeSkip
+						3 [function] = __newindex
+						4 [function] = Impulse
+						5 [function] = __index
+						6 [function] = new
+				21 [table]:
+				FirstPersonModule [table] table: 0x430ccdfac31e0d13
+						1 [function] = ClearTool
+						2 [function] = IsVisible
+						3 [function] = GetTool
+						4 [function] = Init
+						5 [function] = StopAnimation
+						6 [boolean] = true
+						7 [function] = AddTool
+						8 [function] = PlayAnimation
+				22 [table]:
+				SunDialClient [table] table: 0x58cd11bfb020c7c3
+						1 [boolean] = true
+						2 [function] = Init
+				23 [table]:
+				StructurePlacementClient [table] table: 0x008b1d0684435c23
+						1 [function] = AttemptPlaceItem
+						2 [function] = StopPlacingItem
+						3 [boolean] = false
+						4 [boolean] = true
+						5 [function] = Init
+						6 [function] = StartPlacingItem
+				24 [table]:
+				FogEffectModule [table] table: 0xda4f7c23612e70d3
+				25 [table]:
+				RedChestMeteorClient [table] table: 0xb7bfc614e7ecbed3
+						1 [function] = Run
+				26 [table]:
+				EnemyHandler [table] table: 0x3b6a34c58f3111e3
+						1 [function] = ApplyLocalDamage
+						2 [function] = GetLocalHealthRegistered
+						3 [function] = GetHitRegId
+						4 [table]:
+						ItemLinks [table] table: 0x9f46857d832f3943
+						5 [boolean] = true
+						6 [function] = Init
+				27 [table]:
+				ServerLoadedEvent [table] table: 0x1d6f33249f272dd3
+						1 [Instance] = Event
+				28 [table]:
+				Postie [table] table: 0x7ccc8976089dbb73
+						1 [function] = getCallback
+						2 [function] = invokeClient
+						3 [function] = invokeServer
+						4 [function] = setCallback
+				29 [table]:
+				Interface [table] table: 0xdf25be6d2ba1c903
+						1 [Instance] = CraftingTable
+						2 [Instance] = DeadFrame
+						3 [Instance] = Recipes
+						4 [Instance] = Flower
+						5 [Instance] = PopUpMessage
+						6 [Instance] = Compass
+						7 [Instance] = ScratchFrame
+						8 [Instance] = Scanner
+						9 [Instance] = GameLostFrame
+						10 [Instance] = GemTint
+						11 [Instance] = PreloadImages
+						12 [table]:
+						GameLostUI [table] table: 0x11805ff7e870be03
+								1 [function] = Init
+						13 [table]:
+						PopUpUI [table] table: 0x968ecfbdbe0290b3
+								1 [function] = AddPopUp
+								2 [function] = BottomRightNotification
+						14 [Instance] = PartyDeadFrame
+						15 [table]:
+						StatsUI [table] table: 0x59a01e3b872dabf3
+								1 [function] = HideBar
+						16 [Instance] = DayCounter
+						17 [table]:
+						HotbarUI [table] table: 0x0474640bbf1b05f3
+								1 [function] = Init
+								2 [function] = SetEquippedButton
+								3 [function] = UpdateGamepadHotbarSelection
+						18 [Instance] = TopRight
+						19 [Instance] = MissingKidNotif
+						20 [Instance] = GemActivateMenu
+						21 [Instance] = TemperatureFrame
+						22 [Instance] = HealGlow
+						23 [Instance] = PartyGameLostFrame
+						24 [Instance] = PartyMessage
+						25 [Instance] = DiamondCount
+						26 [Instance] = LevelUpFrame
+						27 [Instance] = FlowerAmount
+						28 [Instance] = TrapCharges
+						29 [Instance] = MultiGemMenu
+						30 [Instance] = Furniture
+						31 [table]:
+						PartyMode [table] table: 0xfddf71663f9ac893
+						32 [Instance] = CoinAmount
+						33 [Instance] = HealBar
+						34 [Instance] = NoticeBoardClose
+						35 [Instance] = AmmoLabel
+						36 [Instance] = border1
+						37 [Instance] = FishingCatchFrame
+						38 [Instance] = StatBars
+						39 [Instance] = MobileCursor
+						40 [string] = Game
+						41 [table]:
+						NextDayUI [table] table: 0xe132c6baca907c53
+								1 [function] = Init
+								2 [boolean] = false
+						42 [Instance] = AmmoCrate
+						43 [function] = Init
+						44 [Instance] = PlacementNotif
+						45 [Instance] = LobbyCreate
+						46 [function] = BounceLabelSize
+						47 [Instance] = PeltTrader
+						48 [Instance] = MouseLabel
+						49 [Instance] = ShiftlockWarning
+						50 [Instance] = StrongholdUpdateText
+						51 [Instance] = MapHolder
+						52 [Instance] = TutorialLabel
+						53 [Instance] = Hotbar
+						54 [boolean] = true
+						55 [table]:
+						GlobalUIAnimations [table] table: 0x8b60e2ff2c75c013
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+								3 [function] = Unknown Name
+								4 [function] = Unknown Name
+				30 [table]:
+				DiamondsClient [table] table: 0x51de563ef86862f3
+						1 [boolean] = true
+						2 [function] = DiamondEffect
+						3 [function] = Init
+				31 [table]:
+				FrogGateClient [table] table: 0x1dad420496e880e3
+						1 [boolean] = true
+						2 [function] = Init
+				32 [table]:
+				FairyClient [table] table: 0x30cdd9829f851363
+						1 [function] = GetFairy
+						2 [function] = Init
+						3 [function] = ToggleShop
+						4 [boolean] = true
+						5 [boolean] = false
+				33 [table]:
+				UtilityAlec [table] table: 0xc75b4ea57ca112a3
+						1 [function] = preload
+						2 [function] = tweenModel
+						3 [function] = findBigBuilding
+						4 [function] = printTable
+						5 [function] = deepCopy
+						6 [function] = drawRay
+						7 [function] = GetAnimationLength
+				34 [boolean] = true
+				35 [table]:
+				FrogWhirlpoolClient [table] table: 0x2f889d6d69b49df3
+						1 [function] = ExitFrogCave
+						2 [boolean] = true
+						3 [function] = Init
+				36 [table]:
+				ToolWorkshopClient [table] table: 0x1e5d428250f74603
+						1 [function] = OpenWindow
+						2 [boolean] = true
+						3 [function] = Init
+				37 [table]:
+				GreenGemQuarter [table] table: 0x68d4097b35636dc3
+						1 [boolean] = true
+						2 [function] = Init
+				38 [table]:
+				OilDrillModule [table] table: 0x5949a09ccbc90623
+						1 [boolean] = true
+						2 [function] = Init
+				39 [table]:
+				ToolUpgradeClient [table] table: 0x5ac58c474df0cca3
+						1 [boolean] = true
+						2 [function] = Init
+				40 [table]:
+				RespawnBeaconClient [table] table: 0xc7adb9997451fa63
+						1 [function] = Init
+						2 [boolean] = true
+						3 [function] = PlayGemAddedParticles
+						4 [function] = OpenRespawnBeaconMenu
+				41 [table]:
+				MissingPosterClient [table] table: 0xd56b90ca73f74893
+						1 [function] = ZoomToBoard
+						2 [boolean] = true
+						3 [function] = Init
+				42 [table]:
+				StrongholdModuleClient [table] table: 0x127f1fa2556000e3
+				43 [table]:
+				AlienDoorClient [table] table: 0x6096b90ef4662dd3
+						1 [boolean] = true
+						2 [function] = Init
+				44 [table]:
+				WeatherEffectModule [table] table: 0xd87b713d20f363c3
+						1 [table]:
+						Clear [table] table: 0x3c66f9471d751ba3
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+						2 [function] = Init
+						3 [table]:
+						Blizzard [table] table: 0xe1a3ac531a384013
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+						4 [boolean] = true
+						5 [boolean] = false
+						6 [function] = LightningStrike
+						7 [function] = GetWeather
+						8 [function] = LessRain
+						9 [table]:
+						Rain [table] table: 0x83cd08071967f2e3
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+						10 [table]:
+						Thunderstorm [table] table: 0xfc1fd4d328266533
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+				45 [table]:
+				CameraCutscenesClient [table] table: 0x4a9ccc2cba6eb813
+						1 [function] = OpenSeedBox
+						2 [function] = Jumpscare
+						3 [function] = Init
+						4 [function] = Claw
+						5 [boolean] = true
+				46 [table]:
+				EnergyResourceClient [table] table: 0x499a1116d5ebc2b3
+						1 [function] = Init
+						2 [boolean] = true
+						3 [function] = CanUseEnergy
+						4 [function] = EnergyTooLowIndicator
+						5 [function] = GetCurrentEnergy
+						6 [function] = HideEnergyBar
+						7 [function] = IsOverheating
+						8 [function] = ShowEnergyBar
+						9 [function] = ConsumeEnergy
+				47 [table]:
+				WeatherKitClient [table] table: 0x506a667b9e16dd63
+						1 [boolean] = true
+						2 [function] = Init
+				48 [table]:
+				Animations [table] table: 0x315613b10dc6d843
+						1 [boolean] = true
+						2 [function] = Init
+				49 [table]:
+				PeltTraderClient [table] table: 0xe9aeeb767b12a253
+				50 [table]:
+				BindableEvent [table] table: 0x6fc1757492e459c3
+						1 [function] = Destroy
+						2 [function] = Connect
+						3 [function] = Fire
+						4 [function] = Wait
+						5 [function] = new
+				51 [table]:
+				UFOClient [table] table: 0x677eb502a93b2483
+						1 [boolean] = true
+						2 [function] = Init
+				52 [table]:
+				CutsceneModuleClient [table] table: 0xdb7ca507c6fb0fc3
+						1 [function] = IsCutsceneRunning
+						2 [function] = GetCurrentCutscene
+						3 [function] = EndCutscene
+						4 [boolean] = true
+						5 [function] = Init
+						6 [function] = RunCutscene
+				53 [table]:
+				FireflyHandler [table] table: 0xa5d2dffedeb271c3
+						1 [table]:
+						FireFlyRegions [table] table: 0x4c26e53adcf1e5d3
+								1 [table]:
+								FireflyRegion [table] table: 0x22979172ae8a93d3
+								2 [table]:
+								FireflyRegion [table] table: 0x2111f04256a8d2a3
+								3 [table]:
+								FireflyRegion [table] table: 0x9e2269f3a1887b73
+								4 [table]:
+								FireflyRegion [table] table: 0x0b92bbbfe788d683
+								5 [table]:
+								FireflyRegion [table] table: 0x43cb3436d2eb46d3
+								6 [table]:
+								FireflyRegion [table] table: 0x4c364fc6628befa3
+						2 [boolean] = true
+						3 [function] = Init
+				54 [table]:
+				Settings [table] table: 0x71da93934c409e63
+						1 [function] = Toggle
+						2 [boolean] = true
+						3 [function] = Init
+						4 [boolean] = false
+						5 [boolean] = true
+						6 [function] = Set
+						7 [boolean] = true
+				55 [table]:
+				InteractionHandler [table] table: 0xc76aada5efb3d493
+						1 [function] = StopDragging
+						2 [function] = AttemptPlantSeeds
+						3 [function] = AttemptPlantItem
+						4 [function] = AttemptPickItem
+						5 [function] = AttemptConsumeItem
+						6 [function] = BlockClickInteractions
+						7 [function] = CheckCollectCurrency
+						8 [function] = Init
+						9 [boolean] = true
+						10 [table]:
+						Interactions [table] table: 0x5ec41a26e6a987d3
+								1 [function] = Unknown Name
+								2 [function] = Unknown Name
+								3 [function] = Unknown Name
+								4 [function] = Unknown Name
+								5 [function] = Unknown Name
+								6 [function] = Unknown Name
+								7 [function] = Unknown Name
+								8 [function] = Unknown Name
+								9 [function] = Unknown Name
+								10 [function] = Unknown Name
+								11 [function] = Unknown Name
+								12 [function] = Unknown Name
+								13 [function] = Unknown Name
+								14 [function] = Unknown Name
+								15 [function] = Unknown Name
+								16 [function] = Unknown Name
+								17 [function] = Unknown Name
+								18 [function] = Unknown Name
+								19 [function] = Unknown Name
+								20 [function] = Unknown Name
+								21 [function] = Unknown Name
+								22 [function] = Unknown Name
+								23 [function] = Unknown Name
+								24 [function] = Unknown Name
+								25 [function] = Unknown Name
+								26 [function] = Unknown Name
+								27 [function] = Unknown Name
+								28 [function] = Unknown Name
+						11 [function] = CheckPrimaryInteraction
+						12 [boolean] = false
+						13 [function] = CheckMobileFirstPersonInteraction
+						14 [function] = AttemptEquipArmour
+						15 [function] = GetFocusItem
+						16 [function] = ProcessInteraction
+						17 [function] = GetDraggingItem
+						18 [function] = AttemptHotbarItem
+				56 [table]:
+				SnowClothesClient [table] table: 0xb4176c7e06c2fc53
+						1 [boolean] = true
+						2 [function] = Init
+				57 [table]:
+				StrongholdCountdownClient [table] table: 0xfc90f3e66a913be3
+						1 [function] = DisplayTitle
+						2 [boolean] = true
+						3 [function] = Init
+				58 [function] = FinishLoading
+				59 [table]:
+				FireSourceModule [table] table: 0xc3c4bcdec2f1a493
+						1 [function] = AlecCircle
+						2 [function] = Init
+						3 [function] = RainWarning
+						4 [function] = CultistWarning
+						5 [boolean] = false
+						6 [boolean] = true
+				60 [table]:
+				BiofuelProcessorModule [table] table: 0x487683d4108759c3
+						1 [boolean] = true
+						2 [function] = Init
+				61 [table]:
+				GemRainClient [table] table: 0x417759f478d27d93
+				62 [table]:
+				GameAnalyticsClient [table] table: 0x44ed5d1e0190d023
+						1 [boolean] = true
+						2 [function] = Init
+				63 [table]:
+				PlayerBodyModule [table] table: 0xa9991cb1dd8d9443
+						1 [boolean] = true
+						2 [function] = Init
+				64 [table]:
+				BoostpadClient [table] table: 0x0dc56d2c208d04d3
+						1 [boolean] = true
+						2 [function] = Init
+				65 [table]:
+				DeerModuleClient [table] table: 0xbf517ef382190553
+						1 [boolean] = true
+						2 [function] = Init
+				66 [table]:
+				Utility [table] table: 0xc8318ba54458e793
+						1 [function] = GetShortNumber
+						2 [function] = IsToolDowngrade
+						3 [function] = GetFloorPositionAtRadius
+						4 [function] = ViewPoints
+						5 [function] = WalkIntoRange
+						6 [function] = GetModelMass
+						7 [function] = AddToolWeld
+						8 [function] = AttachTool
+						9 [function] = GetGroundPos
+						10 [function] = ScaleModel
+						11 [function] = GetToolOffset
+						12 [function] = GetPlatform
+						13 [function] = WeldItem
+						14 [function] = WeldParticle
+						15 [function] = ScaleModelAxes
+						16 [function] = SelectFromChanceTable
+						17 [function] = SecondsToMS
+						18 [function] = GetDistanceToMachine
+						19 [function] = NormalDistribution
+						20 [function] = CopyTable
+						21 [function] = LerpColor3
+						22 [function] = SpawnParticles
+						23 [function] = CFrameFromFront
+						24 [function] = GetAngleBetweenVectors
+						25 [function] = GetRandomSpotAroundPosition
+						26 [function] = ScaleScrapToItemDurability
+						27 [function] = RoundToGrid
+						28 [function] = GetDistanceToItem
+						29 [function] = GetItemBagSpace
+						30 [function] = ForAllTagged
+				67 [table]:
+				CraftingTableClient [table] table: 0x3183898bd29aa5d3
+						1 [function] = Init
+						2 [boolean] = true
+						3 [function] = OpenCraftingBench
+						4 [number] = 1
+				68 [table]:
+				FaceScannerClient [table] table: 0x61f1182d2edd9d33
+						1 [boolean] = true
+						2 [function] = Init
+				69 [table]:
+				Databases [table] table: 0x3742388d93270173
+						1 [table]:
+						CraftingDatabase [table] table: 0x2f20eb2c970157d3
+								1 [table]:
+								PossibleBlueprints [table] table: 0x944b7e849302af73
+										1 [table]:
+										1 [table] table: 0x761dbadd92029a83
+												1 [table]:
+												1 [table] table: 0xf08e0addaf038813
+														1 [string] = shows full map with info. can be opened anywhere
+														2 [string] = rbxassetid://77299300821648
+														3 [string] = Map
+														4 [number] = 3
+												2 [table]:
+												2 [table] table: 0x52f9ae15ec7c8ae3
+														1 [string] = rbxassetid://113422091838762
+														2 [string] = Bunny Trap
+														3 [number] = 5
+														4 [number] = 10
+														5 [string] = place near a bunny burrow to catch food
+												3 [table]:
+												3 [table] table: 0x1f6b4645ab3a9d33
+														1 [string] = day counter will increase by +1
+														2 [string] = rbxassetid://80587654130638
+														3 [string] = Old Bed
+														4 [number] = 20
+												4 [table]:
+												4 [table] table: 0xad911bad76f9b043
+														1 [number] = 1
+														2 [string] = rbxassetid://121891510775603
+														3 [string] = Crafting Bench 2
+														4 [number] = 5
+														5 [string] = unlocks TIER 2 of crafting
+										2 [table]:
+										2 [table] table: 0x3a4499ecb9384653
+												1 [table]:
+												1 [table] table: 0x2828d734f878d523
+														1 [number] = 10
+														2 [string] = rbxassetid://102230976374090
+														3 [string] = Crafting Bench 3
+														4 [number] = 15
+														5 [string] = unlocks TIER 3 of crafting
+												2 [table]:
+												2 [table] table: 0x86b45104b93e69f3
+														1 [string] = rbxassetid://132812597645541
+														2 [string] = Farm Plot
+														3 [number] = 10
+														4 [number] = 20
+														5 [string] = grows carrots automatically every 2 days
+												3 [table]:
+												3 [table] table: 0x1b438b3f7ffffe03
+														1 [number] = 5
+														2 [string] = rbxassetid://91524175995155
+														3 [string] = Wood Rain Storage
+														4 [string] = keeps wood dry when stored inside
+												4 [table]:
+												4 [table] table: 0x4d1d38e3bd3c1593
+														1 [number] = 5
+														2 [string] = rbxassetid://117273923717924
+														3 [string] = Sun Dial
+														4 [string] = shows how long is left in day and night
+												5 [table]:
+												5 [table] table: 0xff6ffcb7e47d2163
+														1 [number] = 5
+														2 [string] = rbxassetid://104060204498108
+														3 [string] = Regular Bed
+														4 [string] = day counter will increase by +1
+												6 [table]:
+												6 [table] table: 0x00fda043a53e32b3
+														1 [number] = 2
+														2 [string] = rbxassetid://135380597729254
+														3 [string] = Shelf
+														4 [string] = store items cleanly
+												7 [table]:
+												7 [table] table: 0xe272042f66f14cc3
+														1 [number] = 3
+														2 [string] = rbxassetid://76864876969863
+														3 [string] = Compass
+														4 [string] = shows what direction you're facing
+												8 [table]:
+												8 [table] table: 0x479aafe4a330dad3
+														1 [number] = 4
+														2 [string] = rbxassetid://130686896160568
+														3 [string] = Freezer
+														4 [string] = store food cleanly
+												9 [table]:
+												9 [table] table: 0x2546d5d4e07376a3
+														1 [string] = Fortifies your base
+														2 [string] = rbxassetid://78078289001647
+														3 [string] = Log Wall
+														4 [number] = 12
+												10 [table]:
+												10 [table] table: 0xbb37139caf338c73
+														1 [number] = 3
+														2 [string] = rbxassetid://90217373953354
+														3 [string] = Bear Trap
+														4 [number] = 8
+														5 [string] = set on ground to trap enemies
+										3 [table]:
+										3 [table] table: 0x28a49d5d6df49f83
+												1 [table]:
+												1 [table] table: 0xde485725a334a313
+														1 [number] = 20
+														2 [number] = 2
+														3 [string] = Crafting Bench 4
+														4 [number] = 30
+														5 [string] = rbxassetid://135062312961941
+														6 [string] = unlocks TIER 4 of crafting
+												2 [table]:
+												2 [table] table: 0x941c2b15e475b7e3
+														1 [number] = 10
+														2 [string] = rbxassetid://129036316641685
+														3 [string] = Crock Pot
+														4 [number] = 15
+														5 [string] = combine food to make much better food
+												3 [table]:
+												3 [table] table: 0xf66f814da7395a33
+														1 [number] = 10
+														2 [string] = rbxassetid://138106121514369
+														3 [string] = Good Bed
+														4 [number] = 10
+														5 [string] = day counter will increase by +1
+												4 [table]:
+												4 [table] table: 0x70fd276d5af8ef43
+														1 [number] = 8
+														2 [string] = rbxassetid://102721650573560
+														3 [string] = Lightning Rod
+														4 [string] = attracts lightning and makes it safe
+												5 [table]:
+												5 [table] table: 0xd30b79a559277b53
+														1 [number] = 10
+														2 [string] = rbxassetid://107123774604239
+														3 [string] = Radar
+														4 [number] = 15
+														5 [string] = use scrap to detect important places on the map
+												6 [table]:
+												6 [table] table: 0x1de2bbf4d8660623
+														1 [number] = 10
+														2 [string] = rbxassetid://132406081269236
+														3 [string] = Boost Pad
+														4 [number] = 15
+														5 [string] = get out of base faster
+												7 [table]:
+												7 [table] table: 0xac56f63cd92710f3
+														1 [number] = 12
+														2 [string] = rbxassetid://138042494928283
+														3 [string] = Biofuel Processor
+														4 [number] = 12
+														5 [string] = turns logs and meat into better fuel
+												8 [table]:
+												8 [table] table: 0x3a06ce735be43d03
+														1 [number] = 6
+														2 [string] = rbxassetid://82693408912466
+														3 [string] = Torch
+														4 [number] = 6
+														5 [number] = 10
+														6 [string] = expands the safe zone by a small amount
+										4 [table]:
+										4 [table] table: 0x28a56aa75525ca93
+												1 [table]:
+												1 [table] table: 0x87531af3d4625863
+														1 [number] = 50
+														2 [string] = rbxassetid://119366931002069
+														3 [string] = Crafting Bench 5
+														4 [number] = 50
+														5 [string] = unlocks TIER 5 of crafting
+														6 [number] = 1
+												2 [table]:
+												2 [table] table: 0x651d9ecfd520e5b3
+														1 [number] = 25
+														2 [number] = 1
+														3 [string] = Teleporter
+														4 [number] = 15
+														5 [string] = rbxassetid://123580656199435
+														6 [string] = teleport anywhere on map (requires 2 to work)
+												3 [table]:
+												3 [table] table: 0xc36fc11352e06dc3
+														1 [number] = 30
+														2 [number] = 1
+														3 [string] = Ammo Crate
+														4 [number] = 20
+														5 [string] = rbxassetid://78762516381233
+														6 [string] = buy ammo with scrap
+												4 [table]:
+												4 [table] table: 0x7efc2b276f2381d3
+														1 [number] = 30
+														2 [number] = 1
+														3 [string] = Giant Bed
+														4 [number] = 20
+														5 [string] = rbxassetid://70696280597239
+														6 [string] = day counter will increase by +1
+												5 [table]:
+												5 [table] table: 0x000089dcb062b5a3
+														1 [number] = 35
+														2 [number] = 1
+														3 [string] = Oil Drill
+														4 [number] = 25
+														5 [string] = rbxassetid://133393193425705
+														6 [string] = drills for oil periodically
+										5 [table]:
+										5 [table] table: 0x63d5379cf32ca573
+												1 [table]:
+												1 [table] table: 0xc556f054b5edd883
+														1 [number] = 40
+														2 [string] = rbxassetid://92463909838194
+														3 [string] = Respawn Capsule
+														4 [number] = 40
+														5 [string] = next player to die after charging will respawn here instantly
+														6 [number] = 1
+												2 [table]:
+												2 [table] table: 0x2706bc65772e4e13
+														1 [number] = 40
+														2 [string] = rbxassetid://88949943541298
+														3 [string] = Temporal Accelerometer
+														4 [number] = 40
+														5 [string] = skips the next night completely after charging
+														6 [number] = 1
+												3 [table]:
+												3 [table] table: 0xbab2680db46ee4e3
+														1 [number] = 40
+														2 [string] = rbxassetid://130793981820996
+														3 [string] = Weather Machine
+														4 [number] = 40
+														5 [string] = no rain or thunderstorms for 3 days after charging
+														6 [number] = 1
+								2 [table]:
+								AllowDuplicates [table] table: 0x5ab531549001c3a3
+										1 [string] = Shelf
+										2 [string] = Bear Trap
+										3 [string] = Signpost
+										4 [string] = Wood Rain Storage
+										5 [string] = Lightning Rod
+										6 [string] = Farm Plot
+										7 [string] = Teleporter
+										8 [string] = Torch
+										9 [string] = Bunny Trap
+										10 [string] = Fridge
+										11 [string] = Log Wall
+						2 [table]:
+						CampfireSettings [table] table: 0xe32c9b948ee4a643
+								1 [number] = 7
+				70 [table]:
+				Events [table] table: 0x2ba38217ced2aac3
+						1 [table]:
+						OpenAlienDoor [table] table: 0xdf667bc53d2731a3
+								1 [table]:
+								BindableEvent [table] table: 0x3b8bee7d31251483
+										1 [Instance] = Event
+								2 [string] = OpenAlienDoor
+						2 [table]:
+						LoadSettings [table] table: 0x66f973ed3f58e413
+								1 [Instance] = LoadSettings
+								2 [table]:
+								BindableEvent [table] table: 0x63d2f6453addc133
+										1 [Instance] = Event
+								3 [string] = LoadSettings
+						3 [table]:
+						PlayEnemyHitSound [table] table: 0x3a04edcb837a41a3
+								1 [Instance] = PlayEnemyHitSound
+								2 [table]:
+								BindableEvent [table] table: 0x004e3d3d6bb13ef3
+										1 [Instance] = Event
+								3 [string] = PlayEnemyHitSound
+						4 [table]:
+						PlayDeathAnimation [table] table: 0x176f531f661c42b3
+								1 [table]:
+								BindableEvent [table] table: 0x328c8557ec122ad3
+										1 [Instance] = Event
+								2 [string] = PlayDeathAnimation
+						5 [table]:
+						DiamondVisuals [table] table: 0xbcf912a776ea4893
+								1 [table]:
+								BindableEvent [table] table: 0xdbe06ecfec6c33b3
+										1 [Instance] = Event
+								2 [string] = DiamondVisuals
+						6 [table]:
+						StartFrogInvasion [table] table: 0x7a3f5f2c8d5ec433
+								1 [table]:
+								BindableEvent [table] table: 0x1ea02ab58ddfe153
+										1 [Instance] = Event
+								2 [string] = StartFrogInvasion
+						7 [table]:
+						DestroyObject [table] table: 0x25d8e47595e6d653
+								1 [table]:
+								BindableEvent [table] table: 0x988763ee9e19b9f3
+										1 [Instance] = Event
+								2 [string] = DestroyObject
+						8 [table]:
+						DeerClawAnimation [table] table: 0xd7c5a976751d1993
+								1 [table]:
+								BindableEvent [table] table: 0x30a531cff11d36b3
+										1 [Instance] = Event
+								2 [string] = DeerClawAnimation
+						9 [table]:
+						PlayerRodBobbleInWater [table] table: 0x49001c2a8c6699c3
+								1 [Instance] = PlayerRodBobbleInWater
+								2 [table]:
+								BindableEvent [table] table: 0x8ba8adc982e471a3
+										1 [Instance] = Event
+								3 [string] = PlayerRodBobbleInWater
+						10 [table]:
+						BiomeEntered [table] table: 0xac0c27dd453c01a3
+								1 [table]:
+								BindableEvent [table] table: 0x61f33264c53e2483
+										1 [Instance] = Event
+								2 [string] = BiomeEntered
+						11 [function] = OnClientInvoke
+						12 [table]:
+						PeltTraderUI [table] table: 0x5c323e16711f4ed3
+								1 [table]:
+								BindableEvent [table] table: 0x795e829ed31f5873
+										1 [Instance] = Event
+								2 [string] = PeltTraderUI
+						13 [table]:
+						DialogueInstant [table] table: 0x45f183f76bc1e793
+								1 [table]:
+								BindableEvent [table] table: 0x82eec44fee42dcb3
+										1 [Instance] = Event
+								2 [string] = DialogueInstant
+						14 [table]:
+						GetOffscreenData [table] table: 0x3c733e1bba6aafb3
+								1 [function] = Unknown Name
+								2 [table]:
+								BindableEvent [table] table: 0x1856c25bb7e347d3
+										1 [Instance] = Event
+								3 [string] = GetOffscreenData
+						15 [table]:
+						HealEffects [table] table: 0xafd6774f64ae2d33
+								1 [table]:
+								BindableEvent [table] table: 0x2b21e8e6eaa01653
+										1 [Instance] = Event
+								2 [string] = HealEffects
+						16 [table]:
+						StartStorm [table] table: 0x6e749e445a057823
+								1 [table]:
+								BindableEvent [table] table: 0x9354caedc8055f03
+										1 [Instance] = Event
+								2 [string] = StartStorm
+						17 [table]:
+						UnlockFish [table] table: 0x2a1dc009a763eb83
+								1 [table]:
+								BindableEvent [table] table: 0xd9b4889e5becd3e3
+										1 [Instance] = Event
+								2 [string] = UnlockFish
+						18 [table]:
+						AnimateNightSkipMachine [table] table: 0x4533c0090144ead3
+								1 [table]:
+								BindableEvent [table] table: 0x08a778f900c9dc73
+										1 [Instance] = Event
+								2 [string] = AnimateNightSkipMachine
+						19 [table]:
+						PlayToolSound [table] table: 0xc6f8194e6477a533
+								1 [Instance] = PlayToolSound
+								2 [table]:
+								BindableEvent [table] table: 0x2ab27dd6292a0603
+										1 [Instance] = Event
+								3 [string] = PlayToolSound
+						20 [table]:
+						SlowPlayer [table] table: 0x936fb28ab8e99493
+								1 [table]:
+								BindableEvent [table] table: 0x22f06cfd9267ed33
+										1 [Instance] = Event
+								2 [string] = SlowPlayer
+						21 [function] = InvokeServer
+						22 [table]:
+						PlayerCastRod [table] table: 0x7be002de911eff13
+								1 [Instance] = PlayerCastRod
+								2 [table]:
+								BindableEvent [table] table: 0x680b4e4695182633
+										1 [Instance] = Event
+								3 [string] = PlayerCastRod
+						23 [table]:
+						EnableFirefly [table] table: 0xa906a6bbf967e963
+								1 [table]:
+								BindableEvent [table] table: 0x770c83dd13ea7783
+										1 [Instance] = Event
+								2 [string] = EnableFirefly
+						24 [table]:
+						StartAlienInvasion [table] table: 0x145b184f70febbf3
+								1 [table]:
+								BindableEvent [table] table: 0x707e50d6f67f4b93
+										1 [Instance] = Event
+								2 [string] = StartAlienInvasion
+						25 [table]:
+						LowerAnvil [table] table: 0x61aa64a7e56d8fe3
+								1 [table]:
+								BindableEvent [table] table: 0x7eb7ff4e65eea743
+										1 [Instance] = Event
+								2 [string] = LowerAnvil
+						26 [table]:
+						DeclineGem [table] table: 0xbbc11de92ae38803
+								1 [table]:
+								BindableEvent [table] table: 0x5ea9e5992462bf63
+										1 [Instance] = Event
+								2 [string] = DeclineGem
+						27 [table]:
+						OwlJumpscareAnimation [table] table: 0x623b59ef93a90e03
+								1 [table]:
+								BindableEvent [table] table: 0xa69c118490957163
+										1 [Instance] = Event
+								2 [string] = OwlJumpscareAnimation
+						28 [table]:
+						TryTestTutorial [table] table: 0xf17e5d2b049e8fd3
+								1 [table]:
+								BindableEvent [table] table: 0xdf5aa5950d9da773
+										1 [Instance] = Event
+								2 [string] = TryTestTutorial
+						29 [table]:
+						ReplicateFrozenParticles [table] table: 0xbd82ebba25223e03
+								1 [Instance] = ReplicateFrozenParticles
+								2 [table]:
+								BindableEvent [table] table: 0x9928672a21206163
+										1 [Instance] = Event
+								3 [string] = ReplicateFrozenParticles
+						30 [table]:
+						StopAnimation [table] table: 0x83a5362301c3e2d3
+								1 [table]:
+								BindableEvent [table] table: 0x4cb22a83013a0473
+										1 [Instance] = Event
+								2 [string] = StopAnimation
+						31 [table]:
+						RedChestMeteor [table] table: 0xafbfc53c06c66113
+								1 [table]:
+								BindableEvent [table] table: 0xb05b7d2c0d440c33
+										1 [Instance] = Event
+								2 [string] = RedChestMeteor
+						32 [table]:
+						BroadcastPartyMessage [table] table: 0xc6f3f9de3b99b3b3
+								1 [table]:
+								BindableEvent [table] table: 0x8b176e26269e93d3
+										1 [Instance] = Event
+								2 [string] = BroadcastPartyMessage
+						33 [table]:
+						PreloadDeerTest [table] table: 0xdd17db899b597063
+								1 [Instance] = PreloadDeerTest
+								2 [table]:
+								BindableEvent [table] table: 0xb9f3972897d735c3
+										1 [Instance] = Event
+								3 [string] = PreloadDeerTest
+						34 [table]:
+						ToggleDoor [table] table: 0x946ee70086f979f3
+								1 [Instance] = ToggleDoor
+								2 [table]:
+								BindableEvent [table] table: 0x30826aa19d7b2593
+										1 [Instance] = Event
+								3 [string] = ToggleDoor
+						35 [table]:
+						PeltTraderRefresh [table] table: 0x0e1813cddb62e633
+								1 [table]:
+								BindableEvent [table] table: 0xc2b36fb25ee3cf53
+										1 [Instance] = Event
+								2 [string] = PeltTraderRefresh
+						36 [table]:
+						UpdateMapCells [table] table: 0xcd13ef3cb4602b03
+								1 [Instance] = UpdateMapCells
+								2 [table]:
+								BindableEvent [table] table: 0x00bf64b4b2e2c263
+										1 [Instance] = Event
+								3 [string] = UpdateMapCells
+						37 [table]:
+						AnimateGemMerge [table] table: 0xce4b22b4efa1a573
+								1 [table]:
+								BindableEvent [table] table: 0x130e364d50af4e13
+										1 [Instance] = Event
+								2 [string] = AnimateGemMerge
+						38 [table]:
+						PlayWeaponSound [table] table: 0xfd571d368f728813
+								1 [table]:
+								BindableEvent [table] table: 0xda3444bf90f39d33
+										1 [Instance] = Event
+								2 [string] = PlayWeaponSound
+						39 [table]:
+						TutorialEnd [table] table: 0xabc8820b1b9d06f3
+								1 [table]:
+								BindableEvent [table] table: 0x2ea046bb1f9d3c93
+										1 [Instance] = Event
+								2 [string] = TutorialEnd
+						40 [table]:
+						TargettedSound [table] table: 0x44d43cd5069be533
+								1 [table]:
+								BindableEvent [table] table: 0x81edb36d049a0e53
+										1 [Instance] = Event
+								2 [string] = TargettedSound
+						41 [table]:
+						RunUIAnimation [table] table: 0xd74976452af6e533
+								1 [table]:
+								BindableEvent [table] table: 0xfc31f3ed18770e53
+										1 [Instance] = Event
+								2 [string] = RunUIAnimation
+						42 [table]:
+						WeatherActive [table] table: 0x9a03c267babe7643
+								1 [Instance] = WeatherActive
+								2 [table]:
+								BindableEvent [table] table: 0xbf5f05ffb7bdaf23
+										1 [Instance] = Event
+								3 [string] = WeatherActive
+						43 [function] = FireServer
+						44 [table]:
+						AnimateRespawnAtBeacon [table] table: 0xb903cb593dd16fb3
+								1 [table]:
+								BindableEvent [table] table: 0xded78709315f07d3
+										1 [Instance] = Event
+								2 [string] = AnimateRespawnAtBeacon
+						45 [table]:
+						RemoveFromCompass [table] table: 0xf8e4ed1fd7b73303
+								1 [table]:
+								BindableEvent [table] table: 0xdd9354d452a70a63
+										1 [Instance] = Event
+								2 [string] = RemoveFromCompass
+						46 [table]:
+						NPCAttackAnimation [table] table: 0xad77d95562abae33
+								1 [table]:
+								BindableEvent [table] table: 0xe86b718de5ad7753
+										1 [Instance] = Event
+								2 [string] = NPCAttackAnimation
+						47 [table]:
+						EnemyAggroToPlayer [table] table: 0x6b2185eab2611f73
+								1 [table]:
+								BindableEvent [table] table: 0x6f99dd0a90e13813
+										1 [Instance] = Event
+								2 [string] = EnemyAggroToPlayer
+						48 [function] = Init
+						49 [table]:
+						AnvilBuildTool [table] table: 0x94d5cd4e77f534c3
+								1 [table]:
+								BindableEvent [table] table: 0x2fed1de6fb73dea3
+										1 [Instance] = Event
+								2 [string] = AnvilBuildTool
+						50 [table]:
+						EquipItemHandle [table] table: 0xde8a786a9e36fe03
+								1 [Instance] = EquipItemHandle
+								2 [table]:
+								BindableEvent [table] table: 0xe227c0d998282163
+										1 [Instance] = Event
+								3 [string] = EquipItemHandle
+						51 [table]:
+						InitizalizeFurniture [table] table: 0x46fe6e5116efeb03
+								1 [table]:
+								BindableEvent [table] table: 0x81e2d99314708263
+										1 [Instance] = Event
+								2 [string] = InitizalizeFurniture
+						52 [table]:
+						SetPopUpMessage [table] table: 0x0b83e4029a35fef3
+								1 [table]:
+								BindableEvent [table] table: 0xd6375cfd9c329493
+										1 [Instance] = Event
+								2 [string] = SetPopUpMessage
+						53 [table]:
+						DisableFirefly [table] table: 0x77edd707069fe3c3
+								1 [table]:
+								BindableEvent [table] table: 0xa6b7781d039b72e3
+										1 [Instance] = Event
+								2 [string] = DisableFirefly
+						54 [table]:
+						SetCurrentInterface [table] table: 0x866f91df72ec01b3
+								1 [table]:
+								BindableEvent [table] table: 0xdb4cd967ff6ee5d3
+										1 [Instance] = Event
+								2 [string] = SetCurrentInterface
+						55 [table]:
+						RunWeatherMachineEffect [table] table: 0x85831f07dd84e3e3
+								1 [table]:
+								BindableEvent [table] table: 0xcae8cabf45870b43
+										1 [Instance] = Event
+								2 [string] = RunWeatherMachineEffect
+						56 [table]:
+						ClientLoaded [table] table: 0x7989661c0948fef3
+								1 [Instance] = ClientLoaded
+								2 [table]:
+								BindableEvent [table] table: 0x9a21a3d47acb9493
+										1 [Instance] = Event
+								3 [string] = ClientLoaded
+						57 [table]:
+						FireUpgradeVisuals [table] table: 0x113655e5e1b68623
+								1 [table]:
+								BindableEvent [table] table: 0xef93b58260b7bd03
+										1 [Instance] = Event
+								2 [string] = FireUpgradeVisuals
+						58 [table]:
+						ScrapItem [table] table: 0x22ec3075bfea3053
+								1 [table]:
+								BindableEvent [table] table: 0xa7d558d2b3646bf3
+										1 [Instance] = Event
+								2 [string] = ScrapItem
+						59 [table]:
+						CamShake [table] table: 0xba23f4dced243e83
+								1 [table]:
+								BindableEvent [table] table: 0x175e0407692216e3
+										1 [Instance] = Event
+								2 [string] = CamShake
+						60 [table]:
+						PlayerRodReset [table] table: 0x13c70d669545a953
+								1 [Instance] = PlayerRodReset
+								2 [table]:
+								BindableEvent [table] table: 0x7c2a7dffa8c68ef3
+										1 [Instance] = Event
+								3 [string] = PlayerRodReset
+						61 [table]:
+						MakeIconOnMap [table] table: 0xa2be62cb404ab4c3
+								1 [Instance] = MakeIconOnMap
+								2 [table]:
+								BindableEvent [table] table: 0xe652e91bc5c85ea3
+										1 [Instance] = Event
+								3 [string] = MakeIconOnMap
+						62 [table]:
+						ScannerVisuals [table] table: 0xaed84095145f4653
+								1 [table]:
+								BindableEvent [table] table: 0xaba08f1b19df69f3
+										1 [Instance] = Event
+								2 [string] = ScannerVisuals
+						63 [table]:
+						WarningUpdate [table] table: 0x7bf1f47e58b81f83
+								1 [table]:
+								BindableEvent [table] table: 0x98884ce6daba37e3
+										1 [Instance] = Event
+								2 [string] = WarningUpdate
+						64 [table]:
+						NewFlowerShop [table] table: 0xfe04c8c396874ca3
+								1 [Instance] = NewFlowerShop
+								2 [table]:
+								BindableEvent [table] table: 0xdbb2b363ad876183
+										1 [Instance] = Event
+								3 [string] = NewFlowerShop
+						65 [table]:
+						MusicMutedChanged [table] table: 0x6b96d18b6df47633
+								1 [table]:
+								BindableEvent [table] table: 0x2cc2096ae9761f53
+										1 [Instance] = Event
+								2 [string] = MusicMutedChanged
+						66 [table]:
+						ResetSoldOut [table] table: 0xad68c63ef996d913
+								1 [table]:
+								BindableEvent [table] table: 0xea42b2a678910433
+										1 [Instance] = Event
+								2 [string] = ResetSoldOut
+						67 [table]:
+						DropGem [table] table: 0xc200503c3e3396e3
+								1 [table]:
+								BindableEvent [table] table: 0x01bf89a43c326c43
+										1 [Instance] = Event
+								2 [string] = DropGem
+						68 [table]:
+						FlashlightToggle [table] table: 0xb6aaab62dc434583
+								1 [Instance] = FlashlightToggle
+								2 [table]:
+								BindableEvent [table] table: 0x93c1250259c321e3
+										1 [Instance] = Event
+								3 [string] = FlashlightToggle
+						69 [table]:
+						UnequipItemHandle [table] table: 0x1273467aa363a313
+								1 [Instance] = UnequipItemHandle
+								2 [table]:
+								BindableEvent [table] table: 0xf12782fba0e25a33
+										1 [Instance] = Event
+								3 [string] = UnequipItemHandle
+						70 [table]:
+						InitializeFishPoster [table] table: 0x6430993aa1e44563
+								1 [Instance] = InitializeFishPoster
+								2 [table]:
+								BindableEvent [table] table: 0x60dab1baa16660c3
+										1 [Instance] = Event
+								3 [string] = InitializeFishPoster
+						71 [table]:
+						AnimateOilDrillDoor [table] table: 0xa3e951aff2cb5863
+								1 [table]:
+								BindableEvent [table] table: 0xecc69ab470436dc3
+										1 [Instance] = Event
+								2 [string] = AnimateOilDrillDoor
+						72 [table]:
+						EnergyChanged [table] table: 0x82322adb287c9993
+								1 [table]:
+								BindableEvent [table] table: 0x5ee5265b2af9b6b3
+										1 [Instance] = Event
+								2 [string] = EnergyChanged
+						73 [table]:
+						ReplicateSound [table] table: 0xb3dd5db3700797a3
+								1 [Instance] = ReplicateSound
+								2 [table]:
+								BindableEvent [table] table: 0x56fc8db3f6057e83
+										1 [Instance] = Event
+								3 [string] = ReplicateSound
+						74 [table]:
+						FadeOutFogBlock [table] table: 0x68fd31f72068c4a3
+								1 [Instance] = FadeOutFogBlock
+								2 [table]:
+								BindableEvent [table] table: 0x6dd2c97f22efb983
+										1 [Instance] = Event
+								3 [string] = FadeOutFogBlock
+						75 [table]:
+						FairyMapLocation [table] table: 0x1ebcebaed7ca5ea3
+								1 [Instance] = FairyMapLocation
+								2 [table]:
+								BindableEvent [table] table: 0x411557375b487783
+										1 [Instance] = Event
+								3 [string] = FairyMapLocation
+						76 [table]:
+						SettingsLoaded [table] table: 0xb1e9c0f97af7c4f3
+								1 [table]:
+								BindableEvent [table] table: 0xd291b879ff76ee93
+										1 [Instance] = Event
+								2 [string] = SettingsLoaded
+						77 [table]:
+						ReplicateBullet [table] table: 0xe9f18dc5aac4dc23
+								1 [Instance] = ReplicateBullet
+								2 [table]:
+								BindableEvent [table] table: 0xa4d9466eac47b303
+										1 [Instance] = Event
+								3 [string] = ReplicateBullet
+						78 [function] = Connect
+						79 [table]:
+						EquippedItemChanged [table] table: 0x77e5dcacc177e183
+								1 [table]:
+								BindableEvent [table] table: 0x529c170542f53de3
+										1 [Instance] = Event
+								2 [string] = EquippedItemChanged
+						80 [table]:
+						UnlockGateAnimation [table] table: 0x4353bad496aa7333
+								1 [table]:
+								BindableEvent [table] table: 0x0567ad8d8dd44853
+										1 [Instance] = Event
+								2 [string] = UnlockGateAnimation
+						81 [table]:
+						UpdateFlowerAmount [table] table: 0xb22c144d8aa58623
+								1 [table]:
+								BindableEvent [table] table: 0x96cdcde687a8bd03
+										1 [Instance] = Event
+								2 [string] = UpdateFlowerAmount
+						82 [table]:
+						ReplicatePlayerData [table] table: 0x8f6caa00aaf6bef3
+								1 [table]:
+								BindableEvent [table] table: 0xcb443661b5785493
+										1 [Instance] = Event
+								2 [string] = ReplicatePlayerData
+						83 [table]:
+						StopAlienInvasion [table] table: 0x37a52191ca7d34d3
+								1 [table]:
+								BindableEvent [table] table: 0x2ad42a7148fbda73
+										1 [Instance] = Event
+								2 [string] = StopAlienInvasion
+						84 [function] = FireOtherClients
+						85 [table]:
+						AnvilIngredientAdded [table] table: 0x286087be60ee1503
+								1 [table]:
+								BindableEvent [table] table: 0xac594221e76c3063
+										1 [Instance] = Event
+								2 [string] = AnvilIngredientAdded
+						86 [table]:
+						StrongholdComplete [table] table: 0x50ee919e5ba2f333
+								1 [table]:
+								BindableEvent [table] table: 0x73d22816dfa3c853
+										1 [Instance] = Event
+								2 [string] = StrongholdComplete
+						87 [table]:
+						TutorialEvent [table] table: 0x62c55915f1859913
+								1 [Instance] = TutorialEvent
+								2 [table]:
+								BindableEvent [table] table: 0x61ea135d129ac433
+										1 [Instance] = Event
+								3 [string] = TutorialEvent
+						88 [table]:
+						CreateLightning [table] table: 0x4eec509f68e49843
+								1 [table]:
+								BindableEvent [table] table: 0x0904ab46ef65bd23
+										1 [Instance] = Event
+								2 [string] = CreateLightning
+						89 [table]:
+						FireEnemyProjectile [table] table: 0x0ab7633d85efd953
+								1 [table]:
+								BindableEvent [table] table: 0xf64ba72aba6efef3
+										1 [Instance] = Event
+								2 [string] = FireEnemyProjectile
+						90 [table]:
+						RegainEnergyAmmo [table] table: 0x147179715a68aad3
+								1 [table]:
+								BindableEvent [table] table: 0x7359e1f1d8e99c73
+										1 [Instance] = Event
+								2 [string] = RegainEnergyAmmo
+						91 [table]:
+						CloseBlueprintMenu [table] table: 0x6a9ee736db9cec83
+								1 [table]:
+								BindableEvent [table] table: 0x663b6cbe5f9fc0e3
+										1 [Instance] = Event
+								2 [string] = CloseBlueprintMenu
+						92 [table]:
+						NotifyClassEquipped [table] table: 0x2ea5320b0ae6b4c3
+								1 [table]:
+								BindableEvent [table] table: 0x53cc3fab0f645ea3
+										1 [Instance] = Event
+								2 [string] = NotifyClassEquipped
+						93 [table]:
+						AddEnemyHitParticles [table] table: 0xe588607d6fa3f9f3
+								1 [table]:
+								BindableEvent [table] table: 0xe36b314d54a982b3
+										1 [Instance] = Event
+								2 [string] = AddEnemyHitParticles
+						94 [table]:
+						FlowerDestroy [table] table: 0x8463fbe295a11f83
+								1 [table]:
+								BindableEvent [table] table: 0x79576f0289a737e3
+										1 [Instance] = Event
+								2 [string] = FlowerDestroy
+						95 [table]:
+						UpdateClientSetting [table] table: 0x2583dd0529d39df3
+								1 [Instance] = UpdateClientSetting
+								2 [table]:
+								BindableEvent [table] table: 0x286c15e32d517193
+										1 [Instance] = Event
+								3 [string] = UpdateClientSetting
+						96 [table]:
+						PlayAnimation [table] table: 0xd9ab0501074691f3
+								1 [table]:
+								BindableEvent [table] table: 0xfa6c4f613ac1bd93
+										1 [Instance] = Event
+								2 [string] = PlayAnimation
+						97 [table]:
+						UFOCrashed [table] table: 0xc2ef7336f67bca13
+								1 [table]:
+								BindableEvent [table] table: 0x8fab87bf73faeb33
+										1 [Instance] = Event
+								2 [string] = UFOCrashed
+						98 [table]:
+						HideFurnitureStore [table] table: 0xb5408bf1246b69e3
+								1 [table]:
+								BindableEvent [table] table: 0x5eb877712de91143
+										1 [Instance] = Event
+								2 [string] = HideFurnitureStore
+						99 [table]:
+						StrongholdOpenGate [table] table: 0xba63a8b1d6a88393
+								1 [table]:
+								BindableEvent [table] table: 0xc57c53324db7a8b3
+										1 [Instance] = Event
+								2 [string] = StrongholdOpenGate
+						100 [function] = Fire
+						101 [table]:
+						DiamondsClaimed [table] table: 0xc213799ed070fb73
+								1 [table]:
+								BindableEvent [table] table: 0x816fd061528fa413
+										1 [Instance] = Event
+								2 [string] = DiamondsClaimed
+						102 [table]:
+						RegisterDevice [table] table: 0x2415ca421580d443
+								1 [Instance] = RegisterDevice
+								2 [table]:
+								BindableEvent [table] table: 0x5fed3ee211820923
+										1 [Instance] = Event
+								3 [string] = RegisterDevice
+						103 [table]:
+						PlayerHitByEnemy [table] table: 0xb8c0995a693fb423
+								1 [table]:
+								BindableEvent [table] table: 0x736576ce247c17b3
+										1 [Instance] = Event
+								2 [string] = PlayerHitByEnemy
+						104 [table]:
+						DialogueProximity [table] table: 0xf758e64dfe467f33
+								1 [table]:
+								BindableEvent [table] table: 0xdc2072f57cc7a453
+										1 [Instance] = Event
+								2 [string] = DialogueProximity
+						105 [table]:
+						MouselockEnabledChanged [table] table: 0xd791194732c273b3
+								1 [table]:
+								BindableEvent [table] table: 0xac38631f375c53d3
+										1 [Instance] = Event
+								2 [string] = MouselockEnabledChanged
+						106 [table]:
+						BurnItemInFire [table] table: 0xd95c22427bb5edc3
+								1 [table]:
+								BindableEvent [table] table: 0x3db497a3ffab35a3
+										1 [Instance] = Event
+								2 [string] = BurnItemInFire
+						107 [table]:
+						FlashlightWarning [table] table: 0x02b2be52edc6a493
+								1 [table]:
+								BindableEvent [table] table: 0xc1ceaad26179ffb3
+										1 [Instance] = Event
+								2 [string] = FlashlightWarning
+						108 [table]:
+						BlacksmithExtraScrap [table] table: 0xa38b442a449d7723
+								1 [table]:
+								BindableEvent [table] table: 0x246e859acd9b5003
+										1 [Instance] = Event
+								2 [string] = BlacksmithExtraScrap
+						109 [table]:
+						PromptReviveFriend [table] table: 0x40b88d238c056113
+								1 [table]:
+								BindableEvent [table] table: 0x85d2fd438e070c33
+										1 [Instance] = Event
+								2 [string] = PromptReviveFriend
+						110 [table]:
+						BoostpadParticles [table] table: 0x2786391ad2976ad3
+								1 [Instance] = BoostpadParticles
+								2 [table]:
+								BindableEvent [table] table: 0xee40e55bbd994e83
+										1 [Instance] = Event
+								3 [string] = BoostpadParticles
+						111 [table]:
+						DeerJumpscareAnimation [table] table: 0xb8eef004f8ad9ae3
+								1 [table]:
+								BindableEvent [table] table: 0xa58a78ff6aacc043
+										1 [Instance] = Event
+								2 [string] = DeerJumpscareAnimation
+						112 [table]:
+						FlashTemperatureBarRed [table] table: 0x33baffc629e86313
+								1 [table]:
+								BindableEvent [table] table: 0xd62763aa286a1a33
+										1 [Instance] = Event
+								2 [string] = FlashTemperatureBarRed
+						113 [table]:
+						KnockbackPlayer [table] table: 0xf0e3a65e09b7d003
+								1 [table]:
+								BindableEvent [table] table: 0x3938556a32c30cd3
+										1 [Instance] = Event
+								2 [string] = KnockbackPlayer
+						114 [table]:
+						ProcessItemToBiofuel [table] table: 0x23d8b2442f840173
+								1 [table]:
+								BindableEvent [table] table: 0xa0bfb6fc2b827a13
+										1 [Instance] = Event
+								2 [string] = ProcessItemToBiofuel
+						115 [table]:
+						ScanSuccess [table] table: 0x8beb787958a82af3
+								1 [table]:
+								BindableEvent [table] table: 0xb8ce00c9d6b67093
+										1 [Instance] = Event
+								2 [string] = ScanSuccess
+						116 [table]:
+						PlayerDied [table] table: 0x6a89ee8a797e2493
+								1 [table]:
+								BindableEvent [table] table: 0x2f517a19f8f87fb3
+										1 [Instance] = Event
+								2 [string] = PlayerDied
+						117 [table]:
+						DayDisplay [table] table: 0x3f17a9da5f8ac4b3
+								1 [table]:
+								BindableEvent [table] table: 0x92b3211ad28998d3
+										1 [Instance] = Event
+								2 [string] = DayDisplay
+						118 [table]:
+						RejectRadar [table] table: 0xd49f1ecbe6a38513
+								1 [table]:
+								BindableEvent [table] table: 0xf1b86b6b5ba4e033
+										1 [Instance] = Event
+								2 [string] = RejectRadar
+						119 [table]:
+						AddWeldParticles [table] table: 0xb69283fc0ea60933
+								1 [table]:
+								BindableEvent [table] table: 0xd22e576408a02253
+										1 [Instance] = Event
+								2 [string] = AddWeldParticles
+						120 [table]:
+						RunCutscene [table] table: 0xba4321f54624f933
+								1 [table]:
+								BindableEvent [table] table: 0x2a7cb97dc421d253
+										1 [Instance] = Event
+								2 [string] = RunCutscene
+						121 [table]:
+						UnequipArmourModel [table] table: 0xf2b376565518c7f3
+								1 [Instance] = UnequipArmourModel
+								2 [table]:
+								BindableEvent [table] table: 0xdfdefb9ec919ef93
+										1 [Instance] = Event
+								3 [string] = UnequipArmourModel
+						122 [table]:
+						StopStorm [table] table: 0x1c0dfbdccc370fc3
+								1 [table]:
+								BindableEvent [table] table: 0xf8d26f443635d7a3
+										1 [Instance] = Event
+								2 [string] = StopStorm
+						123 [table]:
+						ChangeColorCorrection [table] table: 0x9f27d86cc027ac13
+								1 [Instance] = ChangeColorCorrection
+								2 [table]:
+								BindableEvent [table] table: 0x71ab6ec4c9e21a03
+										1 [Instance] = Event
+								3 [string] = ChangeColorCorrection
+						124 [table]:
+						ShowFlashlight [table] table: 0x2ee302f68dd08f63
+								1 [table]:
+								BindableEvent [table] table: 0x61c7f96e8c4f56c3
+										1 [Instance] = Event
+								2 [string] = ShowFlashlight
+						125 [table]:
+						TeleportParticles [table] table: 0xc608b57c6051aac3
+								1 [table]:
+								BindableEvent [table] table: 0x02f03af4a1d0cca3
+										1 [Instance] = Event
+								2 [string] = TeleportParticles
+						126 [function] = Wait
+						127 [table]:
+						FireflyApproved [table] table: 0x4589fa15e18f9213
+								1 [table]:
+								BindableEvent [table] table: 0x1ae0765d6e8e7333
+										1 [Instance] = Event
+								2 [string] = FireflyApproved
+						128 [table]:
+						EquipArmourModel [table] table: 0xc4bb7b8a6c13b5a3
+								1 [Instance] = EquipArmourModel
+								2 [table]:
+								BindableEvent [table] table: 0x999eeffad610d883
+										1 [Instance] = Event
+								3 [string] = EquipArmourModel
+						129 [table]:
+						SpeedPlayer [table] table: 0x8a244daf6e101c73
+								1 [table]:
+								BindableEvent [table] table: 0x47353a36e01ff313
+										1 [Instance] = Event
+								2 [string] = SpeedPlayer
+						130 [table]:
+						HideFlashlight [table] table: 0x1fa8e85990490583
+								1 [table]:
+								BindableEvent [table] table: 0x3440200a9fcbe1e3
+										1 [Instance] = Event
+								2 [string] = HideFlashlight
+						131 [table]:
+						PlaySound [table] table: 0x21c21101470275f3
+								1 [table]:
+								BindableEvent [table] table: 0x9cfed9a1cd1c4993
+										1 [Instance] = Event
+								2 [string] = PlaySound
+						132 [function] = FireAllClients
+						133 [table]:
+						UpdateCoinAmount [table] table: 0xe816452680acedc3
+								1 [table]:
+								BindableEvent [table] table: 0xa7430b4f82ae35a3
+										1 [Instance] = Event
+								2 [string] = UpdateCoinAmount
+						134 [boolean] = true
+				71 [table]:
+				PlayerHandler [table] table: 0x17ddb86f23ede2c3
+						1 [Instance] = Humanoid
+						2 [boolean] = true
+						3 [function] = Init
+						4 [function] = ReliableApplyImpulse
+						5 [boolean] = true
+						6 [Instance] = HumanoidRootPart
+				72 [table]:
+				ProjectileClass [table] table: 0x0e453d6f62323583
+						1 [function] = Destroy
+						2 [function] = CreateModel
+						3 [function] = Hit
+						4 [function] = Step
+						5 [function] = Fire
+						6 [table] (Recursive table detected)
+						7 [function] = new
+				73 [table]:
+				MedicClass [table] table: 0x76204e8280434c73
+						1 [boolean] = true
+						2 [function] = Init
+				74 [table]:
+				RecyclerClient [table] table: 0xbc194c9a7f1588e3
+						1 [function] = OpenActivationMenu
+						2 [boolean] = true
+						3 [function] = Init
+				75 [table]:
+				NightSkipMachineClient [table] table: 0x23ac2c2903c71cc3
+						1 [function] = OpenActivationMenu
+						2 [boolean] = true
+						3 [function] = Init
+				76 [table]:
+				FurnitureClient [table] table: 0x3d942d312ae45003
+						1 [boolean] = true
+						2 [function] = UpdateCoinAmount
+						3 [function] = Init
+				77 [table]:
+				FrogInvasionClient [table] table: 0xc8ad010482d9a9e3
+						1 [boolean] = true
+						2 [function] = Init
+				78 [table]:
+				RadarClient [table] table: 0x0acec2a7a2e0b983
+						1 [boolean] = true
+						2 [function] = Init
+						3 [function] = OpenRadarMenu
+				79 [table]:
+				AmmoCrateClient [table] table: 0x854986799ed9c293
+						1 [boolean] = true
+						2 [function] = Init
+						3 [function] = OpenBox
+				80 [table]:
+				MapDrawClient [table] table: 0x8e792505990a7333
+						1 [boolean] = true
+						2 [function] = Init
+						3 [table]:
+						TutorialCircles [table] table: 0x07898c449d3623f3
+						4 [function] = DestroyMap
+						5 [function] = CreateIconOnMap
+						6 [function] = GetIcon
+						7 [function] = GetMapCopy
+				81 [table]:
+				TeleporterClient [table] table: 0x494ddc14644a7403
+						1 [boolean] = true
+						2 [function] = Init
+				82 [table]:
+				MusicPlayer [table] table: 0xcf93fe333467ace3
+						1 [function] = Resume
+						2 [table]:
+						PlaylistQueues [table] table: 0x0b4f8bb135e48a43
+						3 [function] = Init
+						4 [boolean] = true
+						5 [string] = Generic
+						6 [function] = SetPlaylist
+						7 [table]:
+						Playlists [table] table: 0x78fe2de17b25e453
+						8 [function] = Pause
+						9 [boolean] = false
+				83 [table]:
+				TutorialClient [table] table: 0xa634a18d75867273
+						1 [number] = 1
+						2 [boolean] = true
+						3 [function] = Init
+						4 [boolean] = false
+						5 [boolean] = false
+						6 [boolean] = false
+						7 [function] = NewTutorial
+						8 [function] = ClearTutorial
+				84 [table]:
+				FishingUpgradeClient [table] table: 0x49e58eb4c8bc8893
+						1 [boolean] = true
+						2 [function] = Init
+						3 [function] = RequestUpgradeRod
+				85 [table]:
+				CrockpotClient [table] table: 0xfaf4f26bceba2163
+						1 [boolean] = true
+						2 [function] = Init
+				86 [table]:
+				CompassClient [table] table: 0x457037c455f6cef3
+						1 [function] = AddIconToCompass
+						2 [boolean] = true
+						3 [function] = Init
+				87 [table]:
+				WeatherMachineClient [table] table: 0x6355654b5e844f13
+						1 [number] = -99999
+						2 [function] = OpenWeatherMachineMenu
+						3 [number] = 540
+						4 [boolean] = true
+						5 [function] = Init
+						6 [function] = onScanSuccess
+				88 [table]:
+				CampfireEffectModule [table] table: 0xf74f1b7f0c7ecfe3
+						1 [boolean] = false
+						2 [function] = SetEnabled
+				89 [table]:
+				DoorModule [table] table: 0x49507ba08b7c9653
+						1 [function] = ToggleDoor
+						2 [function] = SetDoorState
+				90 [table]:
+				Sound [table] table: 0x93364ec12d155bb3
+						1 [function] = Init
+						2 [boolean] = true
+						3 [function] = CreateSoundObject
+						4 [function] = Play
+						5 [function] = GetSoundObject
+				91 [table]:
+				TemperatureClient [table] table: 0xa22ab67e6c6329f3
+						1 [function] = BarNotEmpty
+						2 [function] = Init
+						3 [function] = FlashBarRed
+						4 [boolean] = true
+						5 [function] = BarEmpty
+						6 [function] = FlashBar
+				92 [table]:
+				ColorCorrectionLightingClient [table] table: 0xb9ac274f58f03633
+						1 [function] = SetFlashlightActive
+						2 [boolean] = true
+						3 [function] = ToggleFire
+						4 [function] = SetAlien
+						5 [boolean] = false
+						6 [function] = Init
+						7 [function] = ChangeColorCorrection
+				93 [table]:
+				DialogueClient [table] table: 0x9fca47dd27cb0083
+						1 [function] = CreateDialogue
+						2 [function] = MessageWhenWithinProximity
+						3 [boolean] = true
+						4 [function] = Init
+				94 [table]:
+				WalkspeedController [table] table: 0x620cae36c30b60c3
+						1 [function] = GetWalkspeedInfo
+						2 [boolean] = true
+						3 [function] = GetHighestPriorityGeneral
+						4 [function] = Init
+						5 [function] = PlayerFrozen
+						6 [function] = AddGeneralWalkspeed
+						7 [function] = ToggleShiftLock
+						8 [function] = StopSprint
+						9 [function] = GetSprinting
+						10 [function] = AddExtraWalkspeed
+						11 [function] = StartSprint
+						12 [function] = UpdateWalkspeed
+						13 [function] = RemoveExtraWalkspeed
+						14 [function] = RemoveGeneralWalkspeed
+						15 [function] = ClearAllWalkspeeds
+						16 [function] = GetHighestPriorityExtra
+				95 [function] = Init
+				96 [table]:
+				KeyModule [table] table: 0x30a81b5e42d6b1a3
+				97 [table]:
+				CampsiteClient [table] table: 0x6dcddb321d6d04b3
+						1 [boolean] = true
+						2 [function] = Init
+				98 [table]:
+				PlayerData [table] table: 0x30ff02d0e8348c23
+				99 [table]:
+				GlobalSettings [table] table: 0x8ddfe126e1f68013
+						1 [number] = 9
+						2 [Vector3] = 0, 0, 0
+						3 [number] = 60
+						4 [number] = 9
+						5 [number] = 10
+						6 [number] = 300
+						7 [number] = 0
+						8 [table]:
+						FireGoalMultiplier [table] table: 0xf1d812be3f219ea3
+								1 [number] = 1
+								2 [number] = 1
+								3 [number] = 1.4
+								4 [number] = 1.6
+								5 [number] = 1.7
+						9 [table]:
+						TimeBetweenEnemySpawns [table] table: 0x1d4769cfaf6aeaa3
+								1 [number] = 60
+								2 [number] = 75
+						10 [number] = 0.7
+						11 [number] = 25
+						12 [number] = 30
+						13 [number] = 10
+						14 [number] = 0
+						15 [number] = 5
+						16 [boolean] = false
+						17 [table]:
+						UpdateLandmarks [table] table: 0x9d0355363522f4c3
+								1 [boolean] = true
+								2 [boolean] = true
+						18 [number] = 1.15
+						19 [number] = 50
+						20 [number] = 20
+						21 [number] = 50
+						22 [number] = 2
+						23 [number] = 8
+						24 [number] = 200
+						25 [number] = 30
+						26 [table]:
+						FireSpeedMultiplier [table] table: 0x0f745efbf2e162d3
+								1 [number] = 0.85
+								2 [number] = 1
+								3 [number] = 1.1
+								4 [number] = 1.2
+								5 [number] = 1.3
+						27 [string] = Destroy
+						28 [number] = -10
+						29 [number] = 10
+						30 [number] = 0.4
+						31 [Vector3] = 0, 0, 0
+						32 [number] = 80
+						33 [number] = 1.5
+						34 [number] = 15
+						35 [string] = 1.0.7
+						36 [number] = 1.4
+						37 [number] = 2
+						38 [number] = 0.3
+						39 [number] = 30
+						40 [number] = 15
+						41 [number] = 6
+						42 [number] = 16
+						43 [number] = 8
+						44 [number] = 20
+						45 [number] = 1
+						46 [number] = -1
+						47 [number] = 15
+						48 [number] = 15
+						49 [number] = 20
+				100 [table]:
+				FlowerAndCoinsClient [table] table: 0x22cdb18f93620c73
+						1 [number] = 0
+						2 [function] = PickupCoins
+						3 [function] = PullFlower
+						4 [number] = 0
+						5 [boolean] = true
+						6 [function] = Init
+				101 [table]:
+				ToolModule [table] table: 0x4c2d77aa1af58853
+						1 [function] = GetModelFromPart
+						2 [boolean] = true
+						3 [function] = Init
+						4 [function] = AddEnemyHitParticles
+						5 [function] = PlayToolSound
+						6 [function] = GetWeaponHits
+						7 [function] = BoxCast
+				102 [table]:
+				CollisionUtility [table] table: 0xc1c015d5cb585f03
+						1 [OverlapParams] = OverlapParams{MaxParts=0, Tolerance=0, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={2 instances...}}
+						2 [function] = GetProjectileHit
+						3 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={4 instances...}}
+						4 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={5 instances...}}
+						5 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={5 instances...}}
+						6 [function] = HasLineOfSight
+						7 [function] = GetGroundPosition
+						8 [function] = GetSphereProjectileHit
+						9 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={6 instances...}}
+						10 [OverlapParams] = OverlapParams{MaxParts=0, Tolerance=0, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={3 instances...}}
+				103 [table]:
+				FlashlightReplicateClient [table] table: 0xd4c67996534cea73
+						1 [boolean] = true
+						2 [function] = Init
+				104 [table]:
+				InventoryHandler [table] table: 0x58a5e89afda931a3
+						1 [function] = DropEquippedItem
+						2 [function] = ClearItemFromInventory
+						3 [function] = ActivateTool
+						4 [boolean] = true
+						5 [function] = DeactivateTool
+						6 [function] = HasTool
+						7 [function] = Init
+						8 [function] = GetCurrentlyEquippedClass
+						9 [function] = UnequipCurrentItem
+						10 [function] = GetCurrentlyEquipped
+						11 [function] = RequestEquipItem
+				105 [table]:
+				OwlModuleClient [table] table: 0x2e39edaebe118993
+						1 [boolean] = true
+						2 [function] = Init
+				106 [table]:
+				CraftingBenchModule [table] table: 0xd1aa96a26e15b1a3
+						1 [boolean] = true
+						2 [function] = Init
+				107 [table]:
+				MapControllerClient [table] table: 0xa673a3455e990923
+						1 [function] = AssignMapModel
+						2 [boolean] = true
+						3 [function] = Init
+						4 [function] = OpenMap
+		2 [Instance] = Wakky3o
+		3 [table]:
+		3 [table] table: 0xcfd8e9359170dbc3
+				1 [table]:
+				1 [table] table: 0xdcc0655ead666f83
+						1 [number] = 0.575
+						2 [number] = 2
+						3 [number] = 0.27
+						4 [number] = 3
+				2 [table]:
+				2 [table] table: 0x321ef329b31e8ed3
+						1 [number] = 0.61
+						2 [number] = 3
+						3 [number] = 0.24
+						4 [number] = 3
+				3 [table]:
+				3 [table] table: 0x906d2949ee1ebaa3
+						1 [number] = 0.78
+						2 [number] = 6
+						3 [number] = 0.12
+						4 [number] = 2
+				4 [table]:
+				4 [table] table: 0x1efb4689911f9873
+						1 [number] = 0.075
+						2 [number] = 1
+						3 [number] = 0.86
+						4 [number] = 4
+						5 [number] = 10
+				5 [table]:
+				5 [table] table: 0xcd75a2d9901f6b83
+						1 [number] = 0.04
+						2 [number] = 1
+						3 [number] = 0.9
+						4 [number] = 7
+						5 [number] = 12
+		4 [Random] = Random
+		5 [Instance] = Run Service
+
+Function Constants: StartCatchTimer
+		1 [number] = 1
+		2 [string] = CatchCount
+		3 [string] = Model
+		4 [string] = RopeAttach
+		5 [string] = RopeConstraint
+		6 [string] = Hook
+		7 [string] = task
+		8 [string] = spawn
+		9 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+
+====================================================================================================
+
+Function Dump: Cast
+
+Function Upvalues: Cast
+		1 [table] (Recursive table detected)
+		2 [Instance] = Wakky3o
+		3 [Instance] = Instance
+		4 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={}}
+
+Function Constants: Cast
+		1 [string] = print
+		2 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		3 [string] = Cast rod
+		4 [string] = ItemHooked
+		5 [string] = ItemCaught
+		6 [string] = HookedItem
+		7 [string] = Sound
+		8 [string] = Play
+		9 [string] = FishCast
+		10 [string] = Volume
+		11 [string] = Replicate
+		12 [string] = ReplicationProperties
+		13 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		14 [number] = 0.5
+		15 [string] = Instance
+		16 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		17 [string] = Character
+		18 [string] = Head
+		19 [number] = 0.4
+		20 [string] = Class
+		21 [string] = GetAttribute
+		22 [string] = Fisherman
+		23 [number] = 1
+		24 [string] = ClassLevel
+		25 [string] = PlayAnimation
+		26 [string] = Events
+		27 [string] = Rod_Cast
+		28 [string] = Speed
+		29 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		30 [string] = Fire
+		31 [string] = FirstPersonModule
+		32 [string] = task
+		33 [string] = wait
+		34 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		35 [number] = 0.05
+		36 [number] = 0.45
+		37 [string] = Equipped
+		38 [string] = Casting
+		39 [string] = State
+		40 [string] = Model
+		41 [string] = Bobber
+		42 [string] = GetPivot
+		43 [string] = IsVisible
+		44 [string] = GetTool
+		45 [string] = Position
+		46 [string] = Hit
+		47 [string] = Unit
+		48 [Vector3] = 0, 10, 0
+		49 [string] = Clone
+		50 [string] = pairs
+		51 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		52 [string] = GetChildren
+		53 [string] = BasePart
+		54 [string] = IsA
+		55 [string] = Transparency
+		56 [string] = GetDescendants
+		57 [string] = Name
+		58 [string] = BobberMain
+		59 [string] = CanCollide
+		60 [string] = Anchored
+		61 [string] = PrimaryPart
+		62 [string] = WeldConstraint
+		63 [string] = Destroy
+		64 [string] = Hook
+		65 [string] = workspace
+		66 [Instance] = Workspace
+		67 [string] = Particles
+		68 [string] = Parent
+		69 [string] = RopeAttach
+		70 [string] = RopeConstraint
+		71 [Vector3] = 0, -60, 0
+		72 [string] = PlayerCastRod
+		73 [string] = FireOtherClients
+		74 [string] = spawn
+		75 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+
+====================================================================================================
+
+Function Dump: ToggleLevelParticles
+
+Function Upvalues: ToggleLevelParticles
+		1 [table] (Recursive table detected)
+
+Function Constants: ToggleLevelParticles
+		1 [string] = pairs
+		2 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		3 [string] = Model
+		4 [string] = GetDescendants
+		5 [string] = ParticleEmitter
+		6 [string] = IsA
+		7 [string] = Name
+		8 [string] = UpgradeParticles
+		9 [string] = Enabled
+		10 [string] = FirstPersonModule
+		11 [string] = IsVisible
+		12 [string] = GetTool
+
+====================================================================================================
+
+Function Dump: UpdateHook
+
+Function Upvalues: UpdateHook
+		1 [table] (Recursive table detected)
+
+Function Constants: UpdateHook
+		1 [string] = task
+		2 [string] = spawn
+		3 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+
+====================================================================================================
+
+Function Dump: ResetHook
+
+Function Upvalues: ResetHook
+		1 [table] (Recursive table detected)
+
+Function Constants: ResetHook
+		1 [string] = Model
+		2 [string] = Bobber
+		3 [string] = pairs
+		4 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		5 [string] = GetChildren
+		6 [string] = BasePart
+		7 [string] = IsA
+		8 [string] = Name
+		9 [string] = BobberMain
+		10 [string] = Transparency
+		11 [string] = FirstPersonModule
+		12 [string] = GetTool
+		13 [string] = RopeAttach
+		14 [string] = RopeConstraint
+		15 [string] = Length
+		16 [string] = Hook
+		17 [string] = Destroy
+		18 [string] = PlayerRodReset
+		19 [string] = Events
+		20 [string] = FireOtherClients
+
+====================================================================================================
+
+Function Dump: CleanUp
+
+Function Upvalues: CleanUp
+		1 [table] (Recursive table detected)
+
+Function Constants: CleanUp
+		1 [string] = pairs
+		2 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		3 [string] = Debris
+		4 [string] = Name
+		5 [string] = FishingParticles
+		6 [string] = task
+		7 [string] = delay
+		8 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		9 [string] = Destroy
+		10 [string] = GuiButtonHandler
+		11 [string] = HideButton
+		12 [string] = Reel
+
+====================================================================================================
+
+Function Dump: Break
+
+Function Upvalues: Break
+		1 [table] (Recursive table detected)
+
+Function Constants: Break
+		1 [string] = print
+		2 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		3 [string] = time to break locally
+		4 [string] = Broken
+		5 [string] = InventoryHandler
+		6 [string] = ClearItemFromInventory
+		7 [string] = RealModel
+
+====================================================================================================
+
+Function Dump: Unknown Name
+
+Function Upvalues: Unknown Name
+		1 [table] (Recursive table detected)
+
+Function Constants: Unknown Name
+		1 [string] = Character
+		2 [string] = ToolHandle
+		3 [string] = FindFirstChild
+		4 [string] = NewBobber
+		5 [string] = Bobber
+		6 [string] = RopeAttach
+		7 [string] = RopeConstraint
+		8 [string] = Length
+		9 [string] = GetPivot
+		10 [string] = Reeling
+		11 [string] = SetAttribute
+		12 [string] = TweenModule
+		13 [string] = new
+		14 [number] = 0.65
+		15 [string] = Quad
+		16 [string] = Play
+		17 [string] = task
+		18 [string] = wait
+		19 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		20 [string] = Parent
+		21 [string] = pairs
+		22 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		23 [string] = GetChildren
+		24 [string] = Name
+		25 [string] = Destroy
+		26 [string] = BobberMain
+		27 [string] = RopeAttachment
+		28 [string] = Attachment1
+		29 [string] = BasePart
+		30 [string] = IsA
+		31 [string] = Transparency
+
+====================================================================================================
+
+Function Dump: Unknown Name
+
+Function Upvalues: Unknown Name
+		1 [table] (Recursive table detected)
+
+Function Constants: Unknown Name
+		1 [string] = Character
+		2 [string] = ToolHandle
+		3 [string] = FindFirstChild
+		4 [string] = pairs
+		5 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		6 [string] = GetChildren
+		7 [string] = Name
+		8 [string] = NewBobber
+		9 [string] = Destroy
+		10 [string] = Bobber
+		11 [string] = Clone
+		12 [string] = BasePart
+		13 [string] = IsA
+		14 [string] = BobberMain
+		15 [string] = Transparency
+		16 [string] = WeldConstraint
+		17 [string] = Parent
+		18 [string] = RopeAttach
+		19 [string] = RopeConstraint
+		20 [string] = RopeAttachment
+		21 [string] = Attachment1
+		22 [string] = RaycastParams
+		23 [string] = new
+		24 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		25 [string] = Enum
+		26 [string] = RaycastFilterType
+		27 [string] = Exclude
+		28 [EnumItem] = Enum.RaycastFilterType.Exclude
+		29 [string] = FilterType
+		30 [string] = workspace
+		31 [Instance] = Workspace
+		32 [string] = Items
+		33 [string] = Particles
+		34 [string] = Map
+		35 [string] = Blockers
+		36 [string] = FilterDescendantsInstances
+		37 [string] = print
+		38 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		39 [string] = unpack
+		40 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		41 [string] = task
+		42 [string] = spawn
+		43 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+
+====================================================================================================
+
+Function Dump: new
+
+Function Upvalues: new
+		1 [table]:
+		1 [table] table: 0xb15413459233afb3
+				1 [function] = Activate
+				2 [function] = TrackLevelUp
+				3 [function] = OnUnequip
+				4 [function] = Cast
+				5 [function] = OnEquip
+				6 [table] (Recursive table detected)
+				7 [function] = new
+				8 [function] = Reel
+				9 [function] = StartFishingAtLocation
+				10 [function] = Break
+				11 [function] = UpdateHook
+				12 [function] = ToggleLevelParticles
+				13 [function] = Deactivate
+				14 [function] = StartCatchTimer
+				15 [function] = Pull
+				16 [function] = ResetHook
+				17 [number] = 0.5
+				18 [function] = CleanUp
+
+Function Constants: new
+		1 [string] = setmetatable
+		2 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		3 [string] = Model
+		4 [string] = RealModel
+		5 [string] = LastCast
+		6 [string] = Idle
+		7 [string] = State
+		8 [string] = CatchCount
+		9 [string] = LastPullTime
+		10 [string] = Debris
+
+====================================================================================================
+
+Function Dump: Reel
+
+Function Upvalues: Reel
+		1 [table] (Recursive table detected)
+		2 [Instance] = Run Service
+		3 [Instance] = Wakky3o
+
+Function Constants: Reel
+		1 [string] = State
+		2 [string] = Casting
+		3 [string] = Fishing
+		4 [string] = Reeling
+		5 [string] = GuiButtonHandler
+		6 [string] = HideButton
+		7 [string] = Reel
+		8 [string] = PlayerRodReset
+		9 [string] = Events
+		10 [string] = FireOtherClients
+		11 [string] = ItemCaught
+		12 [string] = EndCatching
+		13 [string] = FireServer
+		14 [string] = StopAnimation
+		15 [string] = Rod_FishHooked
+		16 [string] = Fire
+		17 [string] = Interface
+		18 [string] = FishingCatchFrame
+		19 [string] = Visible
+		20 [string] = FishingCatchMinigame
+		21 [string] = UnbindFromRenderStep
+		22 [string] = Hook
+		23 [string] = GetPivot
+		24 [string] = ReelOrigin
+		25 [string] = ReelPercent
+		26 [string] = HookedItem
+		27 [string] = BigCatch
+		28 [string] = GetAttribute
+		29 [string] = Utility
+		30 [string] = SpawnParticles
+		31 [string] = Splash_CatchBig
+		32 [string] = Splash_Catch
+		33 [string] = Model
+		34 [string] = RopeAttach
+		35 [string] = RopeConstraint
+		36 [string] = FakeAttachHook
+		37 [string] = Attachment1
+		38 [string] = TweenModule
+		39 [string] = new
+		40 [number] = 0.65
+		41 [string] = Quad
+		42 [string] = BindToComplete
+		43 [string] = Play
+		44 [string] = Sound
+		45 [string] = FishReel
+		46 [string] = Volume
+		47 [string] = Replicate
+		48 [string] = ReplicationProperties
+		49 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		50 [number] = 0.55
+		51 [string] = Instance
+		52 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		53 [string] = Character
+		54 [string] = Head
+		55 [number] = 0.3
+		56 [string] = PlayAnimation
+		57 [string] = Rod_Reel
+		58 [string] = Speed
+		59 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		60 [string] = FirstPersonModule
+
+====================================================================================================
+
+Function Dump: Pull
+
+Function Upvalues: Pull
+		1 [table] (Recursive table detected)
+		2 [Instance] = TweenService
+		3 [Instance] = Wakky3o
+
+Function Constants: Pull
+		1 [string] = AlreadyClickedThisPass
+		2 [string] = Interface
+		3 [string] = FishingCatchFrame
+		4 [string] = TimingBar
+		5 [string] = SuccessArea
+		6 [string] = AbsolutePosition
+		7 [string] = Y
+		8 [string] = AbsoluteSize
+		9 [string] = Bar
+		10 [string] = CatchProgress
+		11 [number] = 1
+		12 [string] = Sound
+		13 [string] = Play
+		14 [string] = FishHitMarker
+		15 [string] = task
+		16 [string] = spawn
+		17 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		18 [string] = FishingMissedMarker
+		19 [string] = GoalLostOnFail
+		20 [string] = CatchGoal
+		21 [string] = ItemCaught
+		22 [string] = ConfirmCatchItem
+		23 [string] = Events
+		24 [string] = FireServer
+		25 [string] = FishCatch
+		26 [string] = Volume
+		27 [string] = Replicate
+		28 [string] = ReplicationProperties
+		29 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		30 [number] = 0.5
+		31 [string] = Instance
+		32 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		33 [string] = Character
+		34 [string] = Head
+		35 [number] = 0.4
+		36 [string] = Reel
+		37 [string] = time
+		38 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		39 [string] = LastPullTime
+		40 [string] = PlayAnimation
+		41 [string] = Rod_Reel
+		42 [string] = Speed
+		43 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		44 [string] = Fire
+		45 [string] = FirstPersonModule
+		46 [string] = Rod_FailReel
+		47 [string] = SuccessBar
+		48 [string] = UDim2
+		49 [string] = new
+		50 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		51 [string] = Size
+		52 [string] = GetProgressBarColour
+		53 [string] = BackgroundColor3
+
+====================================================================================================
+
+Function Dump: StartFishingAtLocation
+
+Function Upvalues: StartFishingAtLocation
+		1 [table] (Recursive table detected)
+		2 [Random] = Random
+
+Function Constants: StartFishingAtLocation
+		1 [string] = Fishing
+		2 [string] = State
+		3 [string] = Model
+		4 [string] = RopeAttach
+		5 [string] = RopeConstraint
+		6 [string] = Attachment
+		7 [string] = Hook
+		8 [string] = GetPivot
+		9 [string] = Position
+		10 [string] = Y
+		11 [string] = GuiButtonHandler
+		12 [string] = ShowButton
+		13 [string] = Reel
+		14 [string] = WorldCFrame
+		15 [string] = Unit
+		16 [string] = math
+		17 [string] = clamp
+		18 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		19 [string] = PlayerRodBobbleInWater
+		20 [string] = Events
+		21 [string] = FireOtherClients
+		22 [string] = Utility
+		23 [string] = SpawnParticles
+		24 [string] = Splash_Cast
+		25 [string] = PlayerHandler
+		26 [string] = HumanoidRootPart
+		27 [Vector3] = 0, 3, 0
+		28 [Vector3] = 1, 0, 1
+		29 [string] = Magnitude
+		30 [number] = 10
+		31 [string] = CurrentDistance
+		32 [number] = 2
+		33 [number] = 1
+		34 [string] = Length
+		35 [string] = task
+		36 [string] = spawn
+		37 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		38 [string] = Instance
+		39 [string] = StartCatchTimer
+
+====================================================================================================
+
+Function Dump: OnUnequip
+
+Function Upvalues: OnUnequip
+		1 [table] (Recursive table detected)
+		2 [Instance] = Run Service
+
+Function Constants: OnUnequip
+		1 [string] = Equipped
+		2 [string] = EndCatching
+		3 [string] = Events
+		4 [string] = FireServer
+		5 [string] = FirstPersonModule
+		6 [string] = StopAnimation
+		7 [string] = PullingRod
+		8 [string] = Rod_FishHooked
+		9 [string] = Fire
+		10 [string] = Interface
+		11 [string] = FishingCatchFrame
+		12 [string] = Visible
+		13 [string] = FishingCatchMinigame
+		14 [string] = UnbindFromRenderStep
+		15 [string] = GuiButtonHandler
+		16 [string] = HideButton
+		17 [string] = Reel
+		18 [string] = ResetHook
+		19 [string] = CleanUp
+
+====================================================================================================
+
+Function Dump: OnEquip
+
+Function Upvalues: OnEquip
+		1 [Instance] = Wakky3o
+		2 [RaycastParams] = RaycastParams{IgnoreWater=false, BruteForceAllSlow=false, RespectCanCollide=false, CollisionGroup=Default, FilterDescendantsInstances={}}
+
+Function Constants: OnEquip
+		1 [string] = Equipped
+		2 [string] = workspace
+		3 [Instance] = Workspace
+		4 [string] = Items
+		5 [string] = Particles
+		6 [string] = Map
+		7 [string] = Blockers
+		8 [string] = Character
+		9 [string] = FilterDescendantsInstances
+		10 [string] = UpdateHook
+		11 [string] = TrackLevelUp
+
+====================================================================================================
+
+Function Dump: TrackLevelUp
+
+Function Upvalues: TrackLevelUp
+
+Function Constants: TrackLevelUp
+		1 [string] = RealModel
+		2 [string] = XP
+		3 [string] = GetAttributeChangedSignal
+		4 [string] = Connect
+		5 [string] = GetAttribute
+		6 [string] = LevelUpXP
+		7 [string] = ToggleLevelParticles
+
+====================================================================================================
+
+Function Dump: Deactivate
+
+Function Upvalues: Deactivate
+
+Function Constants: Deactivate
+
+====================================================================================================
+
+Function Dump: Activate
+
+Function Upvalues: Activate
+
+Function Constants: Activate
+		1 [string] = State
+		2 [string] = Idle
+		3 [string] = time
+		4 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		5 [string] = LastCast
+		6 [string] = Cooldown
+		7 [string] = Cast
+		8 [string] = Casting
+		9 [string] = Reel
+		10 [string] = Fishing
+		11 [string] = HookedItem
+		12 [string] = Pull
+
+====================================================================================================
+
+Function Dump: Unknown Name
+
+Function Upvalues: Unknown Name
+
+Function Constants: Unknown Name
+		1 [string] = Character
+		2 [string] = ToolHandle
+		3 [string] = FindFirstChild
+		4 [string] = Bobber
+		5 [string] = Clone
+		6 [string] = pairs
+		7 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		8 [string] = GetChildren
+		9 [string] = BasePart
+		10 [string] = IsA
+		11 [string] = Name
+		12 [string] = BobberMain
+		13 [string] = Transparency
+		14 [string] = NewBobber
+		15 [string] = WeldConstraint
+		16 [string] = Destroy
+		17 [string] = PivotTo
+		18 [string] = Parent
+		19 [string] = RopeAttach
+		20 [string] = RopeConstraint
+		21 [string] = RopeAttachment
+		22 [string] = Attachment1
+		23 [string] = Length
+
+====================================================================================================
+
+Function Dump: GetProgressBarColour
+
+Function Upvalues: GetProgressBarColour
+
+Function Constants: GetProgressBarColour
+		1 [string] = Color3
+		2 [string] = fromHSV
+		3 [IamAnExxecStub_JustIgnoreMe_IExistForCompatibility] = IamAnExxecStub_JustIgnoreMe_IExistForCompatibility: 0x31e880b81d7c668a
+		4 [number] = 255
+
+====================================================================================================
+]]
