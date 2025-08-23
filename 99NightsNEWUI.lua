@@ -1011,7 +1011,7 @@ RunFunctions.AutoCast = function(state)
                     local areaY = successArea.Position.Y.Scale
                     local areaHeight = successArea.Size.Y.Scale
                     local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
-                    if (barY - areaY) <= 0.05 then
+                    if (barY - areaY) <= 0.1 then
                         VirtualUser:CaptureController()
                         VirtualUser:ClickButton1(Vector2.new())              
                     end
