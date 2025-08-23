@@ -135,7 +135,7 @@ Functions.CollectCoin = function()
     if not request then return end
     for _, v in pairs(workspace.Items:GetChildren()) do
         if v.Name:match("Coin") then
-            request:FireServer(v)
+            request:InvokeServer(v)
         end
     end
 end
@@ -1015,19 +1015,19 @@ RunFunctions.AutoCast = function(state)
                             direction = "down"
                         end
                     end
-                    if math.abs(barY - areaY) <= 0.05 then
+                    if (barY - areaY) <= 0.05 then
                         if direction == "up" and not clickedUp then
                             debounce = true
                             VirtualUser:CaptureController()
                             VirtualUser:ClickButton1(Vector2.new())
-                            task.delay(0.09, function() debounce = false end)
+                            task.delay(0.2, function() debounce = false end)
                             clickedUp = true
                             clickedUp = false 
                         elseif direction == "down" and not clickedDown then
                             debounce = true
                             VirtualUser:CaptureController()
                             VirtualUser:ClickButton1(Vector2.new())
-                            task.delay(0.09, function() debounce = false end)
+                            task.delay(0.2, function() debounce = false end)
                             clickedDown = true
                             clickedDown = false 
                         end
