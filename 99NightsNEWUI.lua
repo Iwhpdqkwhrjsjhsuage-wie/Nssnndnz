@@ -130,6 +130,16 @@ Functions.GetAllActiveToggle = function()
     return false
 end
 
+Functions.CollectCoin = function()
+    local request = RemoteEvents:FindFirstChild("RequestCollectCoin")
+    if not request then return end
+    for _, v in pairs(workspace.Items:GetChildren()) do
+        if v.Name:match("Coin") then
+            request:FireServer(v)
+        end
+    end
+end
+
 Functions.IsInside = function(bar, area)
     local barCenterX = bar.AbsolutePostion.X + (bar.AbsolutePostion.Y / 2)
 
@@ -749,6 +759,9 @@ RunFunctions.ActiveAllCode = function(state)
         task.spawn(function()
             while Functions.GetAllActiveToggle() do
                 task.wait(0.3)
+                if MainToggle.AutoCollectCoin then
+                    Functions.CollectCoin()
+                end
                 if MainToggle.AutoPlant and not MainVariable.AutoPlant then
                     MainVariable.AutoPlant = true
                     task.spawn(function()
@@ -981,6 +994,7 @@ RunFunctions.AutoCast = function(state)
     MainToggle.AutoCast = state
     if MainToggle.AutoCast and not MainToggle.AutoFishing then
         local lastY = nil
+        local debounce = false
         local direction = nil
         local clickedUp = false
         local clickedDown = false 
@@ -989,7 +1003,7 @@ RunFunctions.AutoCast = function(state)
         local bar = gui:WaitForChild("Bar")
         task.spawn(function()
             while MainToggle.AutoCast do
-                if gui.Parent.Visible then
+                if gui.Parent.Visible and not debounce then
                     local barY = bar.Position.Y.Scale
                     local areaY = successArea.Position.Y.Scale
                     local areaHeight = successArea.Size.Y.Scale
@@ -1003,14 +1017,18 @@ RunFunctions.AutoCast = function(state)
                     end
                     if math.abs(barY - areaY) <= 0.05 then
                         if direction == "up" and not clickedUp then
-                            clickedUp = true
-                            VirtualUser:CaptureController()
-                            VirtualUser:ClickButton1(Vector2.new()) 
-                            clickedUp = false 
-                        elseif direction == "down" and not clickedDown then
-                            clickedDown = true
+                            debounce = true
                             VirtualUser:CaptureController()
                             VirtualUser:ClickButton1(Vector2.new())
+                            task.delay(0.09, function() debounce = false end)
+                            clickedUp = true
+                            clickedUp = false 
+                        elseif direction == "down" and not clickedDown then
+                            debounce = true
+                            VirtualUser:CaptureController()
+                            VirtualUser:ClickButton1(Vector2.new())
+                            task.delay(0.09, function() debounce = false end)
+                            clickedDown = true
                             clickedDown = false 
                         end
                     end
@@ -1141,6 +1159,46 @@ AuraTab:AddToggle("ChopTree", {
 })
 
 local OtherTab = Tabs.Main:AddLeftGroupbox("Other", "home")
+
+OtherTab:AddToggle("AutoCollectCoin", {
+	Text = "Auto Collect Coin",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            MainToggle.AutoCollectCoin = Value
+            RunFunctions.ActiveAllCode(Value)
+        end)
+	end,
+})
+
+OtherTab:AddDropdown("PositionPlant", {
+	Values = { "Random", "Player (Yourself)"},
+	Default = 1,
+	Multi = false, -- true / false, allows multiple choices to be selected
+	Text = "Position Plant",
+	Callback = function(Value)
+        if Value == "Random" then
+            PositionPlant = "Random"
+        elseif Value == "Player (Yourself)" then
+            PositionPlant = "Player"
+        end
+	end,
+})
+
+OtherTab:AddToggle("AutoPlant", {
+	Text = "Auto Plant Sapling",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            MainToggle.AutoPlant = Value
+            RunFunctions.ActiveAllCode(Value)
+        end)
+	end,
+})
 
 OtherTab:AddDropdown("TypeFood", {
 	Values = { "Cooked Food", "Raw Food", "Vegetable Food" },
