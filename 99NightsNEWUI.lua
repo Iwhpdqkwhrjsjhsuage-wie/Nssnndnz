@@ -1010,7 +1010,6 @@ RunFunctions.AutoCast = function(state)
                         elseif direction == "down" and not clickedDown then
                             clickedDown = true
                             VirtualUser:CaptureController()
-                            task.wait(0.1)
                             VirtualUser:ClickButton1(Vector2.new())
                             clickedDown = false 
                         end
