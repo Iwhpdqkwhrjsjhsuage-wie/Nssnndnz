@@ -980,6 +980,10 @@ end
 RunFunctions.AutoCast = function(state)
     MainToggle.AutoCast = state
     if MainToggle.AutoCast and not MainToggle.AutoFishing then
+        local lastY = nil
+        local direction = nil
+        local clickedUp = false
+        local clickedDown = false 
         local gui = Interface.FishingCatchFrame.TimingBar
         local successArea = gui:WaitForChild("SuccessArea")
         local bar = gui:WaitForChild("Bar")
@@ -990,10 +994,29 @@ RunFunctions.AutoCast = function(state)
                     local areaY = successArea.Position.Y.Scale
                     local areaHeight = successArea.Size.Y.Scale
                     local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
-                    if math.abs(barY - areaY) <= tolerance then
-                        VirtualUser:CaptureController()
-                        VirtualUser:ClickButton1(Vector2.new())
+                    if lasty then
+                        if barY < lastY then 
+                            direction = "up"
+                        elseif barY > lastY then
+                            direction = "down"
+                        end
                     end
+                    if math.abs(barY - areaY) <= tolerance then
+                        if direction == "up" and not clickedUp then
+                            clickedUp = true
+                            VirtualUser:CaptureController()
+                            VirtualUser:ClickButton1(Vector2.new()) 
+                            clickedUp = false 
+                        elseif direction == "down" and not clickedDown then
+                            clickedDown = true
+                            VirtualUser:CaptureController()
+                            VirtualUser:ClickButton1(Vector2.new())
+                            task.delay(0.1, function()
+                                clickedDown = false 
+                            end)
+                        end
+                    end
+                    lastY = barY
                 end
                 task.wait(0.1)
             end
