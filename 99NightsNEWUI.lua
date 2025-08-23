@@ -2,12 +2,15 @@
 ----\\ SERVICES //----
 local Players = game:GetService("Players")
 local LocalPlayer = game.Players.LocalPlayer or Players.LocalPlayer
+local Interface = LocalPlayer.PlayerGui.Interface
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RemoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local workspace = game:GetService("Workspace")
 local ProximityPromptService = game:GetService("ProximityPromptService")
 local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
+local VirtualUser = game:GetService("VirtualUser")
+local VirtualInputManager = game:GetService("VirtualInputManager")
 ----\\ TOGGLES //----
 local MainToggle = {
     Hitbox = false,
@@ -26,7 +29,10 @@ local MainToggle = {
     ActiveAllCode = false,
     ActiveEsp = false,
     AutoEat = false,
-    MoveModel = false
+    MoveModel = false,
+    AutoReel = false,
+    AutoCast = false,
+    AutoFishing = false
 }
 
 local EspToggle = {
@@ -122,6 +128,18 @@ Functions.GetAllActiveToggle = function()
         end
     end
     return false
+end
+
+Functions.IsInside = function(bar, area)
+    local barCenterX = bar.AbsolutePostion.X + (bar.AbsolutePostion.Y / 2)
+
+    local areaWidth = area.AbsolutePostion.X 
+    local tolerance = math.clamp(50 - areaWidth, 5, 30)
+
+    local areaX1 = area.AbsolutePostion.X - tolerance
+    local areaX2 = area.AbsolutePostion + areaWidth + tolerance
+
+    return barCenterX >= areaX1 and barCenterX <= areaX2
 end
 
 Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
@@ -959,6 +977,24 @@ RunFunctions.MoveModel = function(state)
     end
 end
 
+RunFunctions.AutoCast = function(state)
+    MainToggle.AutoCast = state
+    if MainToggle.AutoCast and not MainToggle.AutoFishing then
+        local gui = Interface.FishingCatchFrame.TimingBar
+        local successArea = gui:WaitForChild("SuccessArea")
+        local bar = gui:WaitForChild("Bar")
+        task.spawn(function()
+            while MainToggle.AutoCast do
+                if Functions.IsInside(bar, successArea) and gui.Visible then
+                    VirtualUser:CaptureController()
+                    VirtualUser:ClickButton1(Vector2.new())
+                end
+            end
+        end)
+    end
+end
+
+
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -1170,6 +1206,21 @@ TeleportTab:AddButton({
 	Visible = true,
 	Risky = false,
 })
+
+local FishingTab = Tabs.Main:AddLeftGroupbox("Fishing", "")
+
+FishingTab:AddToggle("AutoCast", {
+	Text = "Auto Cast",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.AutoCast(Value)
+        end)
+	end,
+})
+
 
 local BringTab = Tabs.Main:AddRightGroupbox("Bring Items", "box")
 
