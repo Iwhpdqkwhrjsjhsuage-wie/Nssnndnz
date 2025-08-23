@@ -301,9 +301,7 @@ Functions.BringFuel = function(target, blacklist)
                 if (blacklist == 'ExceptLog' and not isLogOrChair) or (blacklist == 'ExceptGas' and isLogOrChair) or (blacklist ~= 'ExceptLog' and blacklist ~= 'ExceptGas') then
                     local distance = (v:GetPivot().Position - target).Magnitude
                     if distance > 7 and v.PrimaryPart then
-                        RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                        v:PivotTo(CFrame.new(target))
-                        RemoteEvents:WaitForChild("RequestStopDraggingItem"):FireServer(v)task.spawn(function() 
+                        task.spawn(function() 
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         v:PivotTo(CFrame.new(target))
                         for _, part in pairs(v:GetDescendants()) do
