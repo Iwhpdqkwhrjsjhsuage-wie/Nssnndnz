@@ -1178,22 +1178,9 @@ AuraTab:AddToggle("ChopTree", {
 	end,
 })
 
-local OtherTab = Tabs.Main:AddLeftGroupbox("Other", "home")
+local PlantTab = Tabs.Main:AddLeftGroupbox("PlantTab", "")
 
-OtherTab:AddToggle("AutoCollectCoin", {
-	Text = "Auto Collect Coin",
-	Default = false,
-	Disabled = false,
-	Visible = true,
-	Callback = function(Value)
-		task.spawn(function()
-            MainToggle.AutoCollectCoin = Value
-            RunFunctions.ActiveAllCode(Value)
-        end)
-	end,
-})
-
-OtherTab:AddDropdown("PositionPlant", {
+PlantTab:AddDropdown("PositionPlant", {
 	Values = { "Random", "Player (Yourself)"},
 	Default = 1,
 	Multi = false, -- true / false, allows multiple choices to be selected
@@ -1207,7 +1194,7 @@ OtherTab:AddDropdown("PositionPlant", {
 	end,
 })
 
-OtherTab:AddToggle("AutoPlant", {
+PlantTab:AddToggle("AutoPlant", {
 	Text = "Auto Plant Sapling",
 	Default = false,
 	Disabled = false,
@@ -1220,97 +1207,19 @@ OtherTab:AddToggle("AutoPlant", {
 	end,
 })
 
-OtherTab:AddDropdown("TypeFood", {
-	Values = { "Cooked Food", "Raw Food", "Vegetable Food" },
-	Default = 1,
-	Multi = true, -- true / false, allows multiple choices to be selected
-	Text = "Type Food",
-	Callback = function(Value)
-        for key, value in next, Options.TypeFood.Value do
-			if value then
-                table.insert(SelectedFood, key)
-            end
-		end
-	end,
-})
+local DecorationTab = Tabs.Main:AddLeftGroupbox("Decoration", "")
 
-OtherTab:AddInput("TextBoxHunger", {
-	Default = 20,
-	Numeric = true, -- true / false, only allows numbers
-	Finished = false, -- true / false, only calls callback when you press enter
-	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
-	Text = "Eat if Hunger Reach (%)",
-	Tooltip = "For Mobile",
-	Placeholder = "Type here!",
-	Callback = function(Value)
-		Options.PercentageHunger:SetValue(Value)
-        if tonumber(Value) > 99 then
-            Options.TextBoxTransparencyHitbox:SetValue(99)
-        end
-	end,
-})
-
-OtherTab:AddSlider("PercentageHunger", {
-	Text = "Eat if Hunger Reach (%)",
-	Default = 20,
-	Min = 1,
-	Max = 99,
-	Rounding = 0,
-	Compact = true,
-    Callback = function(Value)
-        persen = Value
-        Options.TextBoxHunger:SetValue(Value)
-	end,
-	Disabled = false,
-	Visible = true, 
-})
-
-OtherTab:AddToggle("AutoEatFood", {
-	Text = "Auto Eat Food",
+DecorationTab:AddToggle("AutoCollectCoin", {
+	Text = "Auto Collect Coin",
 	Default = false,
 	Disabled = false,
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            RunFunctions.AutoEatFood(Value)
+            MainToggle.AutoCollectCoin = Value
+            RunFunctions.ActiveAllCode(Value)
         end)
 	end,
-})
-
-OtherTab:AddButton({
-	Text = "Eat Food",
-	Func = function()
-		Functions.EatFood()
-	end,
-	DoubleClick = false,
-	Disabled = false,
-	Visible = true,
-	Risky = false,
-})
-
-local TeleportTab = Tabs.Main:AddLeftGroupbox("Teleport", "")
-
-TeleportTab:AddToggle("AutoTeleportToCampfire", {
-	Text = "Auto Teleport To Campfire When Night",
-	Default = false,
-	Disabled = false,
-	Visible = true,
-	Callback = function(Value)
-		task.spawn(function()
-            RunFunctions.AutoTeleportToCampfire(Value)
-        end)
-	end,
-})
-
-TeleportTab:AddButton({
-	Text = "Teleport To Campfire",
-	Func = function()
-		Functions.TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
-	end,
-	DoubleClick = false,
-	Disabled = false,
-	Visible = true,
-	Risky = false,
 })
 
 local FishingTab = Tabs.Main:AddLeftGroupbox("Fishing", "")
@@ -1339,6 +1248,113 @@ FishingTab:AddToggle("InstantCatch", {
 	end,
 })
 
+local TeleportTab = Tabs.Main:AddLeftGroupbox("Teleport", "")
+
+TeleportTab:AddToggle("AutoTeleportToCampfire", {
+	Text = "Auto Teleport To Campfire When Night",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.AutoTeleportToCampfire(Value)
+        end)
+	end,
+})
+
+TeleportTab:AddButton({
+	Text = "Teleport To Campfire",
+	Func = function()
+		Functions.TeleportTo(workspace.Map.Campground.MainFire:GetPivot().Position + Vector3.new(0, 15, 0))
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
+
+local FoodTab = Tabs.Main:AddRightGroupbox("Food", "")
+
+FoodTab:AddToggle("AutoCookFood", {
+	Text = "Auto Cook Food",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            MainToggle.AutoCook = Value
+            RunFunctions.ActiveAllCode(Value)
+        end)
+	end,
+})
+
+FoodTab:AddDropdown("TypeFood", {
+	Values = { "Cooked Food", "Raw Food", "Vegetable Food" },
+	Default = 1,
+	Multi = true, -- true / false, allows multiple choices to be selected
+	Text = "Type Food",
+	Callback = function(Value)
+        for key, value in next, Options.TypeFood.Value do
+			if value then
+                table.insert(SelectedFood, key)
+            end
+		end
+	end,
+})
+
+FoodTab:AddInput("TextBoxHunger", {
+	Default = 20,
+	Numeric = true, -- true / false, only allows numbers
+	Finished = false, -- true / false, only calls callback when you press enter
+	ClearTextOnFocus = true, -- true / false, if false the text will not clear when textbox focused
+	Text = "Eat if Hunger Reach (%)",
+	Tooltip = "For Mobile",
+	Placeholder = "Type here!",
+	Callback = function(Value)
+		Options.PercentageHunger:SetValue(Value)
+        if tonumber(Value) > 99 then
+            Options.TextBoxTransparencyHitbox:SetValue(99)
+        end
+	end,
+})
+
+FoodTab:AddSlider("PercentageHunger", {
+	Text = "Eat if Hunger Reach (%)",
+	Default = 20,
+	Min = 1,
+	Max = 99,
+	Rounding = 0,
+	Compact = true,
+    Callback = function(Value)
+        persen = Value
+        Options.TextBoxHunger:SetValue(Value)
+	end,
+	Disabled = false,
+	Visible = true, 
+})
+
+FoodTab:AddToggle("AutoEatFood", {
+	Text = "Auto Eat Food",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.AutoEatFood(Value)
+        end)
+	end,
+})
+
+FoodTab:AddButton({
+	Text = "Eat Food",
+	Func = function()
+		Functions.EatFood()
+	end,
+	DoubleClick = false,
+	Disabled = false,
+	Visible = true,
+	Risky = false,
+})
 
 local BringTab = Tabs.Main:AddRightGroupbox("Bring Items", "box")
 
