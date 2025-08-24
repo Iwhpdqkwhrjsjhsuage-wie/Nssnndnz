@@ -11,6 +11,14 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local VirtualInputManager = game:GetService("VirtualInputManager")
+----\\ MODULES //----
+local fishingRod = ReplicatedStorage:WaitForChild("Tools"):WaitForChild("Fishing Rod") or nil
+local fishingModule
+local originalPull
+if fishingRod and require then
+    fishingModule = require(fishingRod)
+    originalPull = fishingModule.Pull 
+end
 ----\\ TOGGLES //----
 local MainToggle = {
     Hitbox = false,
@@ -32,7 +40,8 @@ local MainToggle = {
     MoveModel = false,
     AutoReel = false,
     AutoCast = false,
-    AutoFishing = false
+    AutoFishing = false,
+    InstantFishing = false
 }
 
 local EspToggle = {
@@ -1014,7 +1023,7 @@ RunFunctions.MoveModel = function(state)
     end
 end
 
-RunFunctions.AutoCast = function(state)
+RunFunctions.AutoReel = function(state)
     MainToggle.AutoCast = state
     if MainToggle.AutoCast and not MainToggle.AutoFishing then
         local lastY = nil
@@ -1037,6 +1046,20 @@ RunFunctions.AutoCast = function(state)
     end
 end
 
+RunFunctions.InstantFishing = function(state)
+    MainToggle.InstantFishing = state
+    if MainToggle.InstantFishing then
+        fishingModule.Pull = function(self, ...)
+            if self.CatchGoal and Functions.IsInside() then
+                self.CatchProgress = self.CatchGoal
+            end
+            return originalPull(self, ...)
+        end
+    else
+        fishingModulePull = originalPull
+    end
+end
+            
 
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -1292,14 +1315,26 @@ TeleportTab:AddButton({
 
 local FishingTab = Tabs.Main:AddLeftGroupbox("Fishing", "")
 
-FishingTab:AddToggle("AutoCast", {
-	Text = "Auto Cast",
+FishingTab:AddToggle("AutoReel", {
+	Text = "Auto Reel",
 	Default = false,
 	Disabled = false,
 	Visible = true,
 	Callback = function(Value)
 		task.spawn(function()
-            RunFunctions.AutoCast(Value)
+            RunFunctions.AutoReel(Value)
+        end)
+	end,
+})
+
+FishingTab:AddToggle("InstantCatch", {
+	Text = "Instant Catch",
+	Default = false,
+	Disabled = false,
+	Visible = true,
+	Callback = function(Value)
+		task.spawn(function()
+            RunFunctions.InstantFishing(Value)
         end)
 	end,
 })
