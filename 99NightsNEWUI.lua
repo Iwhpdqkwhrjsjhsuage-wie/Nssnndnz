@@ -12,7 +12,7 @@ local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local VirtualInputManager = game:GetService("VirtualInputManager")
 ----\\ MODULES //----
-local fishingRod = ReplicatedStorage:WaitForChild("Tools"):WaitForChild("Fishing Rod") or nil
+local fishingRod = ReplicatedStorage:FindFirstChild("Tools"):FindFirstChild("Fishing Rod") or nil
 local fishingModule
 local originalPull
 if fishingRod and require then
@@ -795,7 +795,7 @@ RunFunctions.ActiveAllCode = function(state)
         MainVariable.ActiveMainCode = true
         task.spawn(function()
             while Functions.GetAllActiveToggle() do
-                task.wait(0.3)
+                task.wait(0.2)
                 if MainToggle.AutoCollectCoin then
                     Functions.CollectCoin()
                 end
