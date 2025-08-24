@@ -84,10 +84,10 @@ local EspVariable = {
 
 local SelectedFood = {}
 local SavedPrompt = {}
-local SavedModel = {}
 local SavedChest = {}
 local SelectedItem = {}
 
+local SavedModel = setmetatable({}, { __mode = "kv" })
 local SavedHitbox = setmetatable({}, { __mode = "kv" })
 local SavedEsp = setmetatable({}, { __mode = "k" })
 local SavedFood = setmetatable({}, { __mode = "k" })
@@ -96,6 +96,7 @@ local SavedItems = setmetatable({}, { __mode = "k" })
 local SavedEspAnimal = setmetatable({}, { __mode = "k" })
 local MovingModels = setmetatable({}, { __mode = "kv" })
 
+local isDragging = false
 local ActiveBringItems = false
 local PositionPlant = 'Random'
 local BringFuelItems = false
@@ -249,13 +250,13 @@ Functions.BringFood = function(target, click)
                 if distance > 20 and v.PrimaryPart then
                     if not isDragging and not SavedModel[v] then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                        FireDragEvent = true
+                        isDragging = true
                         SavedModel[v] = true
                     end
                     v:PivotTo(CFrame.new(target))
                     if isDragging and SavedModel[v] then
                         RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
-                        FireDragEvent = false
+                        isDragging = false
                         SavedModel[v] = nil
                     end
                     task.wait(0.1)
@@ -274,13 +275,13 @@ Functions.BringScrap = function(target, click)
                 if distance > 7 and v.PrimaryPart then
                     if not isDragging and not SavedModel[v] then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                        FireDragEvent = true
+                        isDragging = true
                         SavedModel[v] = true
                     end
                     v:PivotTo(CFrame.new(target))
                     if isDragging and SavedModel[v] then
                         RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
-                        FireDragEvent = false
+                        isDragging = false
                         SavedModel[v] = nil
                     end
                     task.wait(0.1)
@@ -302,13 +303,13 @@ Functions.BringFuel = function(target, blacklist)
                     if distance > 7 and v.PrimaryPart then
                         if not isDragging and not SavedModel[v] then
                             RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
-                            FireDragEvent = true
+                            isDragging = true
                             SavedModel[v] = true 
                         end
                         v:PivotTo(CFrame.new(target))
                         if isDragging and SavedModel[v] then
                             RemoteEvents:WaitForChild("StopDraggingItem"):FireServer(v)
-                            FireDragEvent = false
+                            isDragging = false
                             SavedModel[v] = nil
                         end
                         task.wait(0.1)
