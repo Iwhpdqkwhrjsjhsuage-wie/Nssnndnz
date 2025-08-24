@@ -140,10 +140,10 @@ Functions.CollectCoin = function()
 end
 
 Functions.IsInside = function()
-    local gui = Interface:WaitForChild("FishingCatchFrame")
-    local timbar = gui:WaitForChild("TimingBar")
-    local bar = timbar:WaitForChild("Bar")
-    local successArea = timbar:WaitForChild("SuccessArea")
+    local gui = Interface.FishingCatchFrame
+    local timbar = gui.TimingBar
+    local bar = timbar.Bar
+    local successArea = timbar.SuccessArea
     local successAreaY1 = successArea.AbsolutePostion.Y
     local successAreaY2 = successArea.AbsolutePostion.Y + successArea.AbsoluteSize.Y
     local barY1 = bar.AbsolutePostion.Y
