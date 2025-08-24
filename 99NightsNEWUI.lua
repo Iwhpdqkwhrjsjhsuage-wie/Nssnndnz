@@ -1106,6 +1106,11 @@ AuraTab:AddInput("TextBoxRangeAura", {
 	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.RangeAura:SetValue(Value)
+        if tonumber(Value) > 700 then
+            Options.TextBoxRangeAura:SetValue(700)
+        elseif tonumber(Value) < 0 then
+            Options.TextBoxSpeed:SetValue(0)
+        end
 	end,
 })
 
@@ -1134,6 +1139,11 @@ AuraTab:AddInput("TextBoxSpeed", {
 	Placeholder = "Type here!",
 	Callback = function(Value)
 		Options.Speed:SetValue(Value)
+        if tonumber(Value) > 1 then
+            Options.TextBoxSpeed:SetValue(1)
+        elseif tonumber(Value) < 0 then
+            Options.TextBoxSpeed:SetValue(0)
+        end
 	end,
 })
 
@@ -1313,7 +1323,9 @@ FoodTab:AddInput("TextBoxHunger", {
 	Callback = function(Value)
 		Options.PercentageHunger:SetValue(Value)
         if tonumber(Value) > 99 then
-            Options.TextBoxTransparencyHitbox:SetValue(99)
+            Options.TextBoxHunger:SetValue(99)
+        elseif tonumber(Value) < 1 then
+            Options.TextBoxHunger:SetValue(1)
         end
 	end,
 })
@@ -1466,6 +1478,8 @@ HitboxTab:AddInput("TextBoxSizeHitbox", {
 		Options.SizeHitbox:SetValue(Value)
         if tonumber(Value) > 200 then
             Options.TextBoxSizeHitbox:SetValue(200)
+        elseif tonumber(Value) < 0 then
+            Options.TextBoxSizeHitbox:SetValue(0)
         end
 	end,
 })
@@ -1497,6 +1511,8 @@ HitboxTab:AddInput("TextBoxTransparencyHitbox", {
 		Options.TransparancyHitbox:SetValue(Value)
         if tonumber(Value) > 1 then
             Options.TextBoxTransparencyHitbox:SetValue(1)
+        elseif tonumber(Value) < 0 then
+            Options.TextBoxTransparencyHitbox:SetValue(0)
         end
 	end,
 })
