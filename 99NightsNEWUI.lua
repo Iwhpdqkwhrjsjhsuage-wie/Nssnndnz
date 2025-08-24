@@ -148,7 +148,7 @@ Functions.IsInside = function()
     local successAreaY2 = successArea.AbsolutePosition.Y + successArea.AbsoluteSize.Y
     local barY1 = bar.AbsolutePosition.Y
     local barY2 = bar.AbsolutePosition.Y + bar.AbsoluteSize.Y
-    return successAreaY1 >= barY2 or barY1 >= successAreaY1 or barY1 < successAreaY2 and successAreaY2 < barY2 or successAreaY1 < barY1 and barY2 < successAreaY2 
+    return barY2 > successAreaY1 and barY1 < successAreaY2
 end
 
 Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
