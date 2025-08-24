@@ -242,12 +242,13 @@ Functions.AutoPlant = function()
     end)
 end
 
-Functions.BringFood = function(target, click)
+Functions.BringFood = function(target, click, toggle)
     pcall(function()
         for i, v in pairs(workspace.Items:GetChildren()) do
             if v:IsA('Model') and v:GetAttribute('RestoreHunger') and (click or not SavedFood[v]) then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 20 and v.PrimaryPart then
+                    RemoteEvents:WaitForChild("CutsceneFinished"):FireServer()
                     if not isDragging and not SavedModel[v] then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         isDragging = true
@@ -264,15 +265,16 @@ Functions.BringFood = function(target, click)
             end
         end
     end)
+    return not toggle
 end
 
-Functions.BringScrap = function(target, click)
-    workspace.StreamingEnabled = false
+Functions.BringScrap = function(target, click, toggle)
     pcall(function()
         for i, v in pairs(workspace.Items:GetChildren()) do
             if v:IsA('Model') and v.Parent == workspace.Items and v:GetAttribute('Scrappable') then
                 local distance = (v:GetPivot().Position - target).Magnitude
                 if distance > 7 and v.PrimaryPart then
+                    RemoteEvents:WaitForChild("CutsceneFinished"):FireServer()
                     if not isDragging and not SavedModel[v] then
                         RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                         isDragging = true
@@ -289,10 +291,10 @@ Functions.BringScrap = function(target, click)
             end
         end
     end)
+    return not toggle
 end
 
-Functions.BringFuel = function(target, blacklist)
-    workspace.StreamingEnabled = false
+Functions.BringFuel = function(target, blacklist, toggle)
     pcall(function()
         for i, v in pairs(workspace.Items:GetChildren()) do
             if v:IsA('Model') and (v:GetAttribute('BurnFuel') or v:GetAttribute('FuelBurn')) and not v.Name:lower():match('sapling') then
@@ -301,6 +303,7 @@ Functions.BringFuel = function(target, blacklist)
                 if (blacklist == 'ExceptLog' and not isLogOrChair) or (blacklist == 'ExceptGas' and isLogOrChair) or (blacklist ~= 'ExceptLog' and blacklist ~= 'ExceptGas') then
                     local distance = (v:GetPivot().Position - target).Magnitude
                     if distance > 7 and v.PrimaryPart then
+                        RemoteEvents:WaitForChild("CutsceneFinished"):FireServer()
                         if not isDragging and not SavedModel[v] then
                             RemoteEvents:WaitForChild("RequestStartDraggingItem"):FireServer(v)
                             isDragging = true
@@ -318,6 +321,7 @@ Functions.BringFuel = function(target, blacklist)
             end
         end
     end)
+    return not toggle
 end
 
 Functions.GetNearChar = function()
@@ -803,18 +807,16 @@ RunFunctions.ActiveAllCode = function(state)
                         MainVariable.BringFuel1 = true
                         task.spawn(function()
                             pcall(function()
-                                Functions.BringFuel(workspace.Map.Campground.Scrapper.DashedLine.Position + Vector3.new(0, 7, 0), 'ExceptGas')
+                                Functions.BringFuel(workspace.Map.Campground.Scrapper.DashedLine.Position + Vector3.new(0, 7, 0), 'ExceptGas', MainVariable.BringFuel1)
                             end)
-                            MainVariable.BringFuel1 = false
                         end)
                     end
                     if BringScrapItems and not MainVariable.BringScrap then
                         MainVariable.BringScrap = true
                         task.spawn(function()
                             pcall(function()
-                                Functions.BringScrap(workspace.Map.Campground.Scrapper.DashedLine.Position + Vector3.new(0, 7, 0))
+                                Functions.BringScrap(workspace.Map.Campground.Scrapper.DashedLine.Position + Vector3.new(0, 7, 0), false, MainVariable.BringScrap)
                             end)
-                            MainVariable.BringScrap = false
                         end)
                     end
                 end
@@ -822,18 +824,16 @@ RunFunctions.ActiveAllCode = function(state)
                     MainVariable.BringFuel2 = true
                     task.spawn(function()
                         pcall(function()
-                            Functions.BringFuel(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0), 'ExceptLog')
+                            Functions.BringFuel(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0), 'ExceptLog', MainVariable.BringFuel2)
                         end)
-                        MainVariable.BringFuel2 = false
                     end)
                 end
                 if MainToggle.Food and not MainVariable.BringFood then
                     MainVariable.BringFood = true
                     task.spawn(function()
                         pcall(function()
-                            Functions.BringFood(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0))
+                            Functions.BringFood(workspace.Map.Campground.MainFire.InnerTouchZone.Position + Vector3.new(0, 7, 0), false, MainVariable.BringFood)
                         end)
-                        MainVariable.BringFood = false
                     end)
                 end
                 if MainToggle.AutoCook and not MainVariable.AutoCook then
