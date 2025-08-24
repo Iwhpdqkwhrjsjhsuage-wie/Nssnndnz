@@ -140,15 +140,15 @@ Functions.CollectCoin = function()
 end
 
 Functions.IsInside = function(bar, area)
-    local barCenterX = bar.AbsolutePostion.X + (bar.AbsolutePostion.Y / 2)
-
-    local areaWidth = area.AbsolutePostion.X 
-    local tolerance = math.clamp(50 - areaWidth, 5, 30)
-
-    local areaX1 = area.AbsolutePostion.X - tolerance
-    local areaX2 = area.AbsolutePostion + areaWidth + tolerance
-
-    return barCenterX >= areaX1 and barCenterX <= areaX2
+    local gui = Interface:WaitForChild("FishingCatchFrame")
+    local timbar = gui:WaitForChild("TimingBar")
+    local bar = timbar:WaitForChild("Bar")
+    local successArea = timbar:WaitForChild("SuccessArea")
+    local successAreaY1 = successArea.AbsolutePostion.Y
+    local successAreaY2 = successArea.AbsolutePostion.Y + successArea.AbsoluteSize.Y
+    local barY1 = bar.AbsolutePostion.Y
+    local barY2 = bar.AbsolutePostion.Y = bar.AbsoluteSize.Y
+    return successAreaY1 >= barY2 or barY1 >= successAreaY1 or barY1 < successAreaY2 and successAreaY2 < barY2 or successAreaY1 < barY1 and barY2 < successAreaY2 
 end
 
 Functions.MoveModel = function(model: Model, targetPos: Vector3, speed: number)
@@ -1029,15 +1029,9 @@ RunFunctions.AutoCast = function(state)
         local bar = gui:WaitForChild("Bar")
         task.spawn(function()
             while MainToggle.AutoCast do
-                if gui.Parent.Visible and not debounce then
-                    local barY = bar.Position.Y.Scale
-                    local areaY = successArea.Position.Y.Scale
-                    local areaHeight = successArea.Size.Y.Scale
-                    local tolerance = math.clamp(0.1 / areaHeight, 0.02, 0.15)
-                    if (barY - areaY) <= 0.1 then
-                        VirtualUser:CaptureController()
-                        VirtualUser:ClickButton1(Vector2.new())              
-                    end
+                if gui.Parent.Visible and Functions.IsInside() then
+                    VirtualUser:CaptureController()
+                    VirtualUser:ClickButton1(Vector2.new())              
                 end
                 task.wait(0.05)
             end
