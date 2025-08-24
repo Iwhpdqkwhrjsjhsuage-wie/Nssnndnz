@@ -144,10 +144,10 @@ Functions.IsInside = function()
     local timbar = gui.TimingBar
     local bar = timbar.Bar
     local successArea = timbar.SuccessArea
-    local successAreaY1 = successArea.AbsolutePostion.Y
-    local successAreaY2 = successArea.AbsolutePostion.Y + successArea.AbsoluteSize.Y
-    local barY1 = bar.AbsolutePostion.Y
-    local barY2 = bar.AbsolutePostion.Y + bar.AbsoluteSize.Y
+    local successAreaY1 = successArea.AbsolutePosition.Y
+    local successAreaY2 = successArea.AbsolutePosition.Y + successArea.AbsoluteSize.Y
+    local barY1 = bar.AbsolutePosition.Y
+    local barY2 = bar.AbsolutePosition.Y + bar.AbsoluteSize.Y
     return successAreaY1 >= barY2 or barY1 >= successAreaY1 or barY1 < successAreaY2 and successAreaY2 < barY2 or successAreaY1 < barY1 and barY2 < successAreaY2 
 end
 
