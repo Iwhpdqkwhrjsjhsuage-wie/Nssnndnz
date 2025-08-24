@@ -139,7 +139,7 @@ Functions.CollectCoin = function()
     end
 end
 
-Functions.IsInside = function(bar, area)
+Functions.IsInside = function()
     local gui = Interface:WaitForChild("FishingCatchFrame")
     local timbar = gui:WaitForChild("TimingBar")
     local bar = timbar:WaitForChild("Bar")
