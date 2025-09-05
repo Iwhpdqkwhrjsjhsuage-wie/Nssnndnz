@@ -1,0 +1,45 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local FishingController = require(ReplicatedStorage.Controllers.FishingController)
+
+-- Fungsi: paksa release charge
+local function ForceRelease(powerOverride)
+    local power = FishingController:_getPower()
+    if powerOverride then
+        power = powerOverride
+    end
+
+    -- Jalankan proses mirip var125_upvr
+    local sendSuccess, data = FishingController:SendFishingRequestToServer(Vector2.new(0,0), power)
+    if sendSuccess then
+        print(">> Force cast with power:", power)
+        FishingController:FishingRodStarted(data)
+    else
+        warn(">> Failed to cast:", data)
+        FishingController:FishingStopped()
+    end
+end
+
+-- Fungsi AutoCharge + Release
+local function AutoChargeAndRelease()
+    FishingController:RequestChargeFishingRod()
+
+    task.spawn(function()
+        -- tunggu state charge
+        repeat task.wait() until FishingController._getPower(FishingController) > 0
+
+        local conn
+        conn = RunService.Heartbeat:Connect(function()
+            local p = FishingController:_getPower()
+            if p >= 0.95 then
+                ForceRelease(p)
+                conn:Disconnect()
+            end
+        end)
+    end)
+end
+
+-- Jalankan otomatis sekali
+task.wait(1)
+AutoChargeAndRelease()
