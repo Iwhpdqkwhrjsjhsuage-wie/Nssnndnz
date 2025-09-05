@@ -1,0 +1,23 @@
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local FishingController = require(ReplicatedStorage.Controllers.FishingController)
+
+-- Ambil GUI minigame (ganti sesuai nama aslinya di game kamu)
+local player = game.Players.LocalPlayer
+local button = game:GetService("Players").LocalPlayer.PlayerGui.HUD.MobileFishingButton
+
+local function getCircleButtonCenter(button)
+    local absPos = button.AbsolutePosition
+    local absSize = button.AbsoluteSize
+    -- ambil titik tengah lingkaran
+    local center = absPos + (absSize / 2)
+    return Vector2.new(center.X, center.Y)
+end
+
+-- pemakaian
+local clickPos = getCircleButtonCenter(button)
+
+getgenv().ActiveOns = true
+while ActiveOns do
+   FishingController.RequestFishingMinigameClick(clickPos)
+   task.wait(0.05)
+end
