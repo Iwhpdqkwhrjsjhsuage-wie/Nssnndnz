@@ -3572,7 +3572,7 @@ Components.TitleBar = (function()
 
 				-- Logo Section
 				New("ImageLabel", {
-					Image = "rbxassetid://11262159835",
+					Image = "rbxassetid://121794676391296",
 					Size = UDim2.fromOffset(Config.LogoSize or 24, Config.LogoSize or 24),
 					BackgroundTransparency = 1,
 					LayoutOrder = 0,
