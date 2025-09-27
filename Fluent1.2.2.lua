@@ -4289,7 +4289,7 @@ Components.Window = (function()
 		local nevcitScreen = Instance.new("ScreenGui", game.CoreGui)
 		nevcitScreen.Name = "ToggleUi"
 		protect_gui(nevcitScreen)
-	    local nevcitButton = Instance.new("ImageButton", Window.Root)
+	    local nevcitButton = Instance.new("ImageButton", nevcitScreen)
 		nevcitButton.Image = "rbxassetid://109433041620615"
 		nevcitButton.Size = UDim2.new(0, size[1], 0, size[2])
 		nevcitButton.Position = UDim2.new(0.15, 0, 0.15, 0)
