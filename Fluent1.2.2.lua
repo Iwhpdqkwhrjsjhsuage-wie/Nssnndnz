@@ -4286,7 +4286,7 @@ Components.Window = (function()
 		end)
 		local size = {35, 35}
 		local protect_gui = protectgui or (syn and syn.protect_gui) or function() end
-		local nevcitScreen = Instance.new("ScreenGui", Window or game.CoreGui)
+		local nevcitScreen = Instance.new("ScreenGui", game.CoreGui)
 		nevcitScreen.Name = "ToggleUi"
 		protect_gui(nevcitScreen)
 	    local nevcitButton = Instance.new("ImageButton", Window.Root)
