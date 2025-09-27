@@ -4286,6 +4286,9 @@ Components.Window = (function()
 		end)
 		local size = {35, 35}
 		local protect_gui = protectgui or (syn and syn.protect_gui) or function() end
+		local nevcitScreen = Instance.new("ScreenGui", Window or game.CoreGui)
+		nevcitScreen.Name = "ToggleUi"
+		protect_gui(nevcitScreen)
 	    local nevcitButton = Instance.new("ImageButton", Window.Root)
 		nevcitButton.Image = "rbxassetid://109433041620615"
 		nevcitButton.Size = UDim2.new(0, size[1], 0, size[2])
@@ -4330,11 +4333,6 @@ Components.Window = (function()
 				Window.AcrylicPaint.Model:Destroy()
 			end
 			Window.Root:Destroy()
-			nevcitButton:Destroy()
-			if uicon then
-				uicon:Disconnect()
-				uicon = nil
-			end
 		end
 
 		local DialogModule = Components.Dialog:Init(Window)
