@@ -4296,6 +4296,9 @@ Components.Window = (function()
 		nevcitButton.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 		nevcitButton.Active = true
 		nevcitButton.Draggable = true
+		local nevcitUI = Instance.new("UIStroke", nevcitButton)
+		nevcitUI.Thickness = 4
+		nevcitUI.Color = Color3.fromRGB(0, 0, 0)
 		local uicon
 		uicon = nevcitButton.MouseButton1Click:Connect(function()
 			if Window.Root.Visible then
